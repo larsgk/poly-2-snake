@@ -1,0 +1,94 @@
+<link rel="import" href="bower_components/polymer/polymer-element.html">
+<link rel="import" href="singleton-mixin.html">
+<link rel="import" href="bower_components/paper-button/paper-button.html">
+
+
+<dom-module id="poly-snake">
+  <template>
+  <h2>[[direction]]</h2>
+    <dom-repeat items="[[snake]]">
+      <template>[[item.count]] - [[item.direction]]<br></template>
+    </dom-repeat>
+  </template>
+
+  <script>
+
+    const _KEY_DIR = {
+      "TL": ["KeyW", "Numpad7"],
+      "TR": ["KeyE", "Numpad9"],
+      "BL": ["KeyS", "Numpad1"],
+      "BR": ["KeyD", "Numpad3"]
+    };
+
+    class PolySnake extends Polymer.Element {
+      static get is() { return 'poly-snake' }
+
+      static get config() {
+        return {
+          properties: {
+            snake: {
+              type: Array,
+              value: []
+            },
+            direction: {
+              type: String,
+              value: "UR"
+            },
+          }
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+
+        this.counter = 0;
+
+        this.notifyPath('snake');
+
+        let evtDetail = {
+          value: this.snake,
+          queueProperty: true,
+          path: 'snake'
+        }
+
+        setInterval(_ => {
+          this.snake.push(this.newPart(this.counter++));
+          if(this.counter>=30)
+            this.snake.splice(0,1);
+          this.notifyPath('snake');
+        }, 250);
+
+        requestAnimationFrame(this._installListeners.bind(this));
+      }
+
+      newPart(count) {
+        return {
+          count: count,
+          direction: count % 6,
+          color: count % 4
+        }
+      }
+
+      _installListeners() {
+        console.log(document);
+        document.addEventListener('keydown', evt => {
+          if(!evt.repeat) {
+            console.log('down', evt);
+            for(let dir in _KEY_DIR) {
+              if(_KEY_DIR[dir].includes(evt.code)) {
+                this.direction = dir;
+                break;
+              }
+            }
+          }
+        });
+        document.addEventListener('keyup', evt => {
+          console.log('up', evt);
+        });
+      }
+    }
+
+    customElements.define(PolySnake.is, PolySnake);
+
+  </script>
+</dom-module>
