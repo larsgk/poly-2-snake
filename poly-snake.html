@@ -1,13 +1,15 @@
 <link rel="import" href="bower_components/polymer/polymer-element.html">
-<link rel="import" href="singleton-mixin.html">
 <link rel="import" href="bower_components/paper-button/paper-button.html">
-
+<link rel="import" href="poly-snake-part.html">
 
 <dom-module id="poly-snake">
   <template>
   <h2>[[direction]]</h2>
+
+  <canvas id="canvas" width="512" height="512"></canvas>
+
     <dom-repeat items="[[snake]]">
-      <template>[[item.count]] - [[item.direction]]<br></template>
+      <template><poly-snake-part data="[[item]]" ctx="[[ctx]]"></poly-snake-part><br></template>
     </dom-repeat>
   </template>
 
@@ -20,6 +22,15 @@
       "BR": ["KeyD", "Numpad3"]
     };
 
+    const Sin60 = Math.sin(Math.PI/3);
+
+    const _DIR_DELTA = {
+      "TL": {x: -10 * 0.5, y: -10 * Sin60 },
+      "TR": {x:  10 * 0.5, y: -10 * Sin60 },
+      "BL": {x: -10 * 0.5, y:  10 * Sin60 },
+      "BR": {x:  10 * 0.5, y:  10 * Sin60 },
+    };
+
     class PolySnake extends Polymer.Element {
       static get is() { return 'poly-snake' }
 
@@ -28,20 +39,22 @@
           properties: {
             snake: {
               type: Array,
-              value: []
+              value: [{
+                direction: this.direction,
+                x: 256,
+                y: 256
+              }]
             },
             direction: {
               type: String,
-              value: "UR"
-            },
+              value: "TR"
+            }
           }
         };
       }
 
       connectedCallback() {
         super.connectedCallback();
-
-        this.counter = 0;
 
         this.notifyPath('snake');
 
@@ -52,20 +65,22 @@
         }
 
         setInterval(_ => {
-          this.snake.push(this.newPart(this.counter++));
-          if(this.counter>=30)
-            this.snake.splice(0,1);
+          this.snake.unshift(this.newPart(this.snake[0], this.direction));
+          if(this.snake.length>=10)
+            this.snake.pop();
           this.notifyPath('snake');
-        }, 250);
+        }, 2500);
+
+        this.ctx = this.$.canvas.getContext('2d');
 
         requestAnimationFrame(this._installListeners.bind(this));
       }
 
-      newPart(count) {
+      newPart(prevPart, direction) {
         return {
-          count: count,
-          direction: count % 6,
-          color: count % 4
+          direction: this.direction,
+          x: prevPart.x + (direction ? _DIR_DELTA[direction].x : 0),
+          y: prevPart.y + (direction ? _DIR_DELTA[direction].y : 0)
         }
       }
 
