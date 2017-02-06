@@ -29,16 +29,16 @@
 
       connectedCallback() {
         super.connectedCallback();
-        console.log("aaargh new");
+        console.log("New allocation");
       }
 
       _dataChanged(data) {
-        console.log("Data changed", data)
+        //console.log("Data changed", data)
         requestAnimationFrame(this.render.bind(this));
       }
 
       render() {
-        console.log("render?",!!this.ctx,this.data);
+        //console.log("render?",!!this.ctx,this.data);
         if(!this.ctx) return;
 
         this.ctx.beginPath();
