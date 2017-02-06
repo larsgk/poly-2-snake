@@ -3,9 +3,9 @@
 
 
 <dom-module id="poly-snake-part">
-  <!--<template>
-    [[data.count]] - [[data.direction]]
-  </template>-->
+  <template>
+    [[data.x]],[[data.y]]
+  </template>
 
   <script>
     class PolySnakePart extends Polymer.Element {
@@ -22,22 +22,28 @@
               type: Object,
               value: null
             }
-          }
+          },
+          observers: ['_dataChanged(data)']
         };
       }
 
       connectedCallback() {
         super.connectedCallback();
+        console.log("aaargh new");
+      }
 
+      _dataChanged(data) {
+        console.log("Data changed", data)
         requestAnimationFrame(this.render.bind(this));
       }
 
       render() {
+        console.log("render?",!!this.ctx,this.data);
         if(!this.ctx) return;
 
         this.ctx.beginPath();
         this.ctx.arc(this.data.x,this.data.y,5,0,Math.PI*2,false);
-        this.ctx.fillStyle = '#ddd';
+        this.ctx.fillStyle = this.data.color;
         this.ctx.fill();
       }
 

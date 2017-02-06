@@ -40,9 +40,10 @@
             snake: {
               type: Array,
               value: [{
-                direction: this.direction,
+                direction: "TR",
                 x: 256,
-                y: 256
+                y: 256,
+                color: 'red'
               }]
             },
             direction: {
@@ -65,11 +66,11 @@
         }
 
         setInterval(_ => {
-          this.snake.unshift(this.newPart(this.snake[0], this.direction));
+          this.unshift('snake',this.newPart(this.snake[0], this.direction));
           if(this.snake.length>=10)
-            this.snake.pop();
-          this.notifyPath('snake');
-        }, 2500);
+            this.pop('snake');
+          this.snake[this.snake.length-1].color = 'white';
+        }, 250);
 
         this.ctx = this.$.canvas.getContext('2d');
 
@@ -80,7 +81,8 @@
         return {
           direction: this.direction,
           x: prevPart.x + (direction ? _DIR_DELTA[direction].x : 0),
-          y: prevPart.y + (direction ? _DIR_DELTA[direction].y : 0)
+          y: prevPart.y + (direction ? _DIR_DELTA[direction].y : 0),
+          color: ['#f0f','#00f','#ddd'][Math.floor(3*Math.random())]
         }
       }
 
