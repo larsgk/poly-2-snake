@@ -1,6 +1,7 @@
 <link rel="import" href="bower_components/polymer/polymer-element.html">
 <link rel="import" href="bower_components/paper-button/paper-button.html">
 <link rel="import" href="poly-snake-part.html">
+<link rel="import" href="hexa-snake.html">
 
 <dom-module id="poly-snake">
   <template>
@@ -16,22 +17,26 @@
   <script>
 
     const _KEY_DIR = {
-      "TL": ["KeyW", "Numpad7"],
-      "TR": ["KeyE", "Numpad9"],
-      "BL": ["KeyS", "Numpad1"],
-      "BR": ["KeyD", "Numpad3"]
+        0: ["KeyD"],
+       60: ["KeyE"],
+      120: ["KeyW"],
+      180: ["KeyA"],
+      240: ["KeyZ"],
+      300: ["KeyX"]
     };
 
     const Sin60 = Math.sin(Math.PI/3);
 
     const _DIR_DELTA = {
-      "TL": {x: -10 * 0.5, y: -10 * Sin60 },
-      "TR": {x:  10 * 0.5, y: -10 * Sin60 },
-      "BL": {x: -10 * 0.5, y:  10 * Sin60 },
-      "BR": {x:  10 * 0.5, y:  10 * Sin60 },
+      0: {x:  10, y: 0 },
+      60: {x:  10 * 0.5, y: -10 * Sin60 },
+      120: {x: -10 * 0.5, y: -10 * Sin60 },
+      180: {x: -10, y: 0 },
+      240: {x: -10 * 0.5, y:  10 * Sin60 },
+      300: {x:  10 * 0.5, y:  10 * Sin60 },
     };
 
-    class PolySnake extends Polymer.Element {
+    class PolySnake extends HexaSnake(Polymer.Element) {
       static get is() { return 'poly-snake' }
 
       static get config() {
@@ -40,7 +45,7 @@
             snake: {
               type: Array,
               value: [{
-                direction: "TR",
+                direction: 0,
                 x: 256,
                 y: 256,
                 color: 'red'
@@ -48,7 +53,7 @@
             },
             direction: {
               type: String,
-              value: "TR"
+              value: 0
             }
           }
         };
@@ -80,20 +85,22 @@
       newPart(prevPart, direction) {
         return {
           direction: this.direction,
-          x: prevPart.x + (direction ? _DIR_DELTA[direction].x : 0),
-          y: prevPart.y + (direction ? _DIR_DELTA[direction].y : 0),
+          x: prevPart.x + (direction!==undefined ? _DIR_DELTA[direction].x : 0),
+          y: prevPart.y + (direction!==undefined ? _DIR_DELTA[direction].y : 0),
           color: ['#f0f','#00f','#ddd'][Math.floor(3*Math.random())]
         }
       }
 
       _installListeners() {
+        this.generateGrid(4);
         console.log(document);
         document.addEventListener('keydown', evt => {
           if(!evt.repeat) {
             console.log('down', evt);
             for(let dir in _KEY_DIR) {
               if(_KEY_DIR[dir].includes(evt.code)) {
-                this.direction = dir;
+                if(Math.abs(this.direction-dir)!=180)
+                  this.direction = dir;
                 break;
               }
             }

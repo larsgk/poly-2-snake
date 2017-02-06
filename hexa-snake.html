@@ -1,0 +1,37 @@
+<script>
+const HexaSnake = subclass => class extends subclass {
+    static get config() {
+        return {
+            properties: {
+                grid: {
+                type: Array,
+                value: null,
+                }
+            }//,
+            //observers: [ 'gridChanged(grid)' ]
+        }
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+    }
+
+    generateGrid(sideLength) {
+        this.grid = [];
+        for(let row=0;row<sideLength*2;row++) {
+            let arr = []
+            for(let field=0;field<sideLength*2+1+2*(row<sideLength?row:sideLength*2-row-1);field++) {
+                arr.push({row:row,field:field,xpos:(row<sideLength?-row:-sideLength*2+row+1)});
+            }
+            this.grid.push(arr);
+            console.log(arr.length);
+        }
+    }
+
+
+}
+</script>
