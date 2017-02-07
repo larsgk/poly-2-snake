@@ -4,8 +4,21 @@ const HexaSnake = subclass => class extends subclass {
         return {
             properties: {
                 grid: {
+                    type: Array,
+                    value: null,
+                },
+                snake: {
                 type: Array,
-                value: null,
+                value: [{
+                    direction: 0,
+                    x: 256,
+                    y: 256,
+                    color: 'red'
+                }]
+                },
+                direction: {
+                    type: String,
+                    value: 0
                 }
             }//,
             //observers: [ 'gridChanged(grid)' ]
@@ -14,13 +27,19 @@ const HexaSnake = subclass => class extends subclass {
 
     connectedCallback() {
         super.connectedCallback();
+
+        // todo: snakey functionality (movement, eating, etc.)
+        setInterval(_ => {
+
+          this.snake[this.snake.length-1].color = 'white';
+        }, 250);
     }
 
     disconnectedCallback() {
         super.disconnectedCallback();
     }
 
-    generateGrid(sideLength) {
+    generateGridOld(sideLength) {
         this.grid = [];
         for(let row=0;row<sideLength*2;row++) {
             let arr = []
@@ -29,6 +48,50 @@ const HexaSnake = subclass => class extends subclass {
             }
             this.grid.push(arr);
             console.log(arr.length);
+        }
+    }
+
+    generateGrid(sideLength) {
+        // faster with a rectangular grid mapped to triangles
+        this._num_cols = 4*sideLength-1;
+        this._num_rows = 2*sideLength;
+        // make a max_cols,max_rows
+        this.grid = Array(this._num_rows).fill().map(() => Array(this._num_cols).fill({}));
+
+        // make "portals" (on the open sides of the hexagon)
+        // make a border
+        // make obstacles
+        // make bg
+    }
+
+    changeDirection(direction) {
+        // going in the same direction and directly 180 degree turn not valid
+        if(this.direction !== direction && Math.abs(this.direction-direction)!=180) {
+            this.direction = direction;
+        }
+    }
+
+    move(extend) {
+        // send events out on fruit eaten, wall/own hit, etc. 
+        const newHead = this.getNewHead();
+
+        this.unshift('snake',newHead);
+        if(!extend)
+            this.pop('snake');
+
+    }
+
+    getNewHead() {
+        // use the position, directon [0,60,120,180,240,300] + knowledge about the grid to move, be blocked, follow portal, etc.
+        let row = this.snake[0].row;
+        let col = this.snake[0].col;
+        switch(this.direction) {
+            case 0:
+                col = (col+1)%this._num_cols;
+                break;
+            case 180:
+                col = (col+this._num_cols-1)%this._num_cols;
+                break;
         }
     }
 
