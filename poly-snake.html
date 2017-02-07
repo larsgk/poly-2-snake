@@ -2,6 +2,7 @@
 <link rel="import" href="bower_components/paper-button/paper-button.html">
 <link rel="import" href="poly-snake-part.html">
 <link rel="import" href="hexa-snake.html">
+<link rel="import" href="audio-mixin.html">
 
 <dom-module id="poly-snake">
   <template>
@@ -36,7 +37,7 @@
       300: {x:  10 * 0.5, y:  10 * Sin60 },
     };
 
-    class PolySnake extends HexaSnake(Polymer.Element) {
+    class PolySnake extends AudioMixin(HexaSnake(Polymer.Element)) {
       static get is() { return 'poly-snake' }
 
       static get config() {
@@ -99,8 +100,10 @@
             console.log('down', evt);
             for(let dir in _KEY_DIR) {
               if(_KEY_DIR[dir].includes(evt.code)) {
-                if(Math.abs(this.direction-dir)!=180)
+                if(Math.abs(this.direction-dir)!=180) {
                   this.direction = dir;
+                  this.playEffect('splash');
+                }
                 break;
               }
             }
@@ -109,6 +112,9 @@
         document.addEventListener('keyup', evt => {
           console.log('up', evt);
         });
+
+        // load sounds
+        this.loadEffect('./splash1.ogg', 'splash')
       }
     }
 

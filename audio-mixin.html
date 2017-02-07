@@ -1,0 +1,135 @@
+<script>
+const AudioMixin = (_ => {
+  const _AudioMixin = subclass => class extends subclass {
+      static get config() {
+      return {
+        properties: {
+          data: {
+            type: Object,
+            value: _AudioMixin["data"],
+          }
+        },
+        observers: [ 'dataChanged(data)' ]
+      }
+    }
+
+    dataChanged(data) {
+      _AudioMixin.notifyPath('data');
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      _AudioMixin["instances"].push(this);
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      const i = _AudioMixin["instances"].indexOf(this);
+      if (i >= 0) {
+          _AudioMixin["instances"].splice(i, 1);
+      }
+    }
+
+    loadEffect(url, name) {
+        var getSound = new XMLHttpRequest();
+        getSound.open("GET", url, true);
+        getSound.responseType = "arraybuffer";
+        getSound.onload = _ => {
+            this.data.ctx.decodeAudioData(getSound.response, buffer => {
+                this.data.effects[name] = buffer;
+            });
+        }
+        getSound.send();
+    }
+
+    loadMusic(url, name) {
+        this.data.music[name] = new Audio(url);
+    }
+
+    playMusic(name, loop, volume) {
+        // assuming Audio media element (TODO: stop music...)
+        var snd = this.data.music[name];
+        if(!snd)
+            return;
+
+        if(volume) {
+            snd.volume = volume;
+        }
+
+        if(loop) {
+            if (typeof snd.loop == 'boolean')
+            {
+                snd.loop = true;
+            }
+            else
+            {
+                snd.addEventListener('ended', _ => {
+                    this.currentTime = 0;
+                    snd.play();
+                }, false);
+            }
+        }
+        snd.play();
+    }
+
+    muteMusic(name, muted) {
+        // assuming Audio media element
+        var snd = this.data.sounds[name];
+        if(!snd)
+            return;
+
+        if(muted)
+            snd.pause();
+        else
+            snd.play();
+    }
+
+    playEffect(name) {
+        console.log("[playEffect] ", name);
+        if(this.data.muted)
+            return;
+
+        var snd = this.data.effects[name];
+        if(!snd)
+            return;
+        // WebAudio...
+        var playSound = this.data.ctx.createBufferSource();
+        playSound.buffer = snd;
+        playSound.connect(this.data.ctx.destination);
+        playSound.start(0);
+    }
+
+    setMute(muted) {
+        this.data.muted = muted;
+
+        this.muteMusic('theme', muted); // todo handle other music than 'theme' (e.g. remember last music played)
+    }
+
+  };
+
+  Object.defineProperty(_AudioMixin, "data", {
+    value: {
+        effects: {},
+        music: {},
+        muted: false,
+        ctx: new (window.AudioContext || window.webkitAudioContext)()
+    },
+    writable: false,
+    enumerable: false,
+    configurable: false
+  });
+  Object.defineProperty(_AudioMixin, "instances", {
+    value: [],
+    writable: false,
+    enumerable: false,
+    configurable: false
+  });
+
+  _AudioMixin.notifyPath = function(path) {
+    _AudioMixin["instances"].forEach(instance => instance.notifyPath(path))
+  }
+
+  return _AudioMixin;
+})();
+
+</script>
