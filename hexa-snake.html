@@ -11,8 +11,8 @@ const HexaSnake = subclass => class extends subclass {
                     type: Array,
                     value: [{
                         direction: 0,
-                        row:3,
-                        col:4,
+                        row:1,
+                        col:2,
                         color: 'red'
                     }]
                 },
@@ -29,26 +29,10 @@ const HexaSnake = subclass => class extends subclass {
         super.connectedCallback();
 
         // todo: snakey functionality (movement, eating, etc.)
-        setInterval(_ => {
-
-          this.snake[this.snake.length-1].color = 'white';
-        }, 250);
     }
 
     disconnectedCallback() {
         super.disconnectedCallback();
-    }
-
-    generateGridOld(sideLength) {
-        this.grid = [];
-        for(let row=0;row<sideLength*2;row++) {
-            let arr = []
-            for(let field=0;field<sideLength*2+1+2*(row<sideLength?row:sideLength*2-row-1);field++) {
-                arr.push({row:row,field:field,xpos:(row<sideLength?-row:-sideLength*2+row+1)});
-            }
-            this.grid.push(arr);
-            console.log(arr.length);
-        }
     }
 
     generateGrid(sideLength) {
@@ -56,7 +40,15 @@ const HexaSnake = subclass => class extends subclass {
         this._num_cols = 4*sideLength-1;
         this._num_rows = 2*sideLength;
         // make a max_cols,max_rows
-        this.grid = Array(this._num_rows).fill().map(() => Array(this._num_cols).fill({}));
+        this.grid = Array(this._num_rows).fill().map(() => Array(this._num_cols).fill());
+
+        for(let row=0;row<this._num_rows;row++) {
+            for(let col=0;col<this._num_cols;col++) {
+                this.grid[row][col] = {
+                    color: ['#8f8','#3d3','#6e6'][Math.floor(3*Math.random())]
+                };
+            }
+        }
 
         // make "portals" (on the open sides of the hexagon)
         // make a border
@@ -76,12 +68,16 @@ const HexaSnake = subclass => class extends subclass {
         const newHead = this.getNewHead();
 
         // do stuff
-        console.log(newHead);
+        //console.log(newHead);
+
+        this.grid[newHead.row][newHead.col].snake = newHead;
 
         this.unshift('snake',newHead);
-        if(!extend)
+        if(!extend) {
+            let tail = this.snake.slice(-1)[0];
+            this.grid[tail.row][tail.col].snake = null;
             this.pop('snake');
-
+        }
     }
 
     getNewHead() {
@@ -93,18 +89,23 @@ const HexaSnake = subclass => class extends subclass {
                 col = (col+1)%this._num_cols;
                 break;
             case 60:
-                // something like...
-                if((row+col)&1) row = (row+this._num_rows-1)%this._num_rows;
+                if((row+col+1)&1) row = (row+this._num_rows-1)%this._num_rows;
                 else col = (col+1)%this._num_cols;
                 break;
             case 120:
+                if((row+col+1)&1) row = (row+this._num_rows-1)%this._num_rows;
+                else col = (col+this._num_cols-1)%this._num_cols;
                 break;
             case 180:
                 col = (col+this._num_cols-1)%this._num_cols;
                 break;
             case 240:
+                if((row+col)&1) row = (row+1)%this._num_rows;
+                else col = (col+this._num_cols-1)%this._num_cols;
                 break;
             case 300:
+                if((row+col)&1) row = (row+1)%this._num_rows;
+                else col = (col+1)%this._num_cols;
                 break;
             default:
                 console.log(`Unknown direction: ${this.direction}`);
