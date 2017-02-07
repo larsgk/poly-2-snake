@@ -8,16 +8,16 @@ const HexaSnake = subclass => class extends subclass {
                     value: null,
                 },
                 snake: {
-                type: Array,
-                value: [{
-                    direction: 0,
-                    x: 256,
-                    y: 256,
-                    color: 'red'
-                }]
+                    type: Array,
+                    value: [{
+                        direction: 0,
+                        row:3,
+                        col:4,
+                        color: 'red'
+                    }]
                 },
                 direction: {
-                    type: String,
+                    type: Number,
                     value: 0
                 }
             }//,
@@ -75,6 +75,9 @@ const HexaSnake = subclass => class extends subclass {
         // send events out on fruit eaten, wall/own hit, etc. 
         const newHead = this.getNewHead();
 
+        // do stuff
+        console.log(newHead);
+
         this.unshift('snake',newHead);
         if(!extend)
             this.pop('snake');
@@ -89,12 +92,25 @@ const HexaSnake = subclass => class extends subclass {
             case 0:
                 col = (col+1)%this._num_cols;
                 break;
+            case 60:
+                // something like...
+                if((row+col)&1) row = (row+this._num_rows-1)%this._num_rows;
+                else col = (col+1)%this._num_cols;
+                break;
+            case 120:
+                break;
             case 180:
                 col = (col+this._num_cols-1)%this._num_cols;
                 break;
+            case 240:
+                break;
+            case 300:
+                break;
+            default:
+                console.log(`Unknown direction: ${this.direction}`);
         }
+
+        return {row:row,col:col};
     }
-
-
 }
 </script>

@@ -18,23 +18,12 @@
   <script>
 
     const _KEY_DIR = {
-        0: ["KeyD"],
-       60: ["KeyE"],
-      120: ["KeyW"],
-      180: ["KeyA"],
-      240: ["KeyZ"],
-      300: ["KeyX"]
-    };
-
-    const Sin60 = Math.sin(Math.PI/3);
-
-    const _DIR_DELTA = {
-      0: {x:  10, y: 0 },
-      60: {x:  10 * 0.5, y: -10 * Sin60 },
-      120: {x: -10 * 0.5, y: -10 * Sin60 },
-      180: {x: -10, y: 0 },
-      240: {x: -10 * 0.5, y:  10 * Sin60 },
-      300: {x:  10 * 0.5, y:  10 * Sin60 },
+      "KeyD":   0,
+      "KeyE":  60,
+      "KeyW": 120,
+      "KeyA": 180,
+      "KeyZ": 240,
+      "KeyX": 300 
     };
 
     class PolySnake extends AudioMixin(HexaSnake(Polymer.Element)) {
@@ -43,19 +32,6 @@
       static get config() {
         return {
           properties: {
-            snake: {
-              type: Array,
-              value: [{
-                direction: 0,
-                x: 256,
-                y: 256,
-                color: 'red'
-              }]
-            },
-            direction: {
-              type: String,
-              value: 0
-            }
           }
         };
       }
@@ -66,10 +42,7 @@
         this.notifyPath('snake');
 
         setInterval(_ => {
-          this.unshift('snake',this.newPart(this.snake[0], this.direction));
-          if(this.snake.length>=10)
-            this.pop('snake');
-          this.snake[this.snake.length-1].color = 'white';
+          this.move(false);
         }, 250);
 
         this.ctx = this.$.canvas.getContext('2d');
@@ -77,31 +50,18 @@
         requestAnimationFrame(this._installListeners.bind(this));
       }
 
-      newPart(prevPart, direction) {
-        return {
-          direction: this.direction,
-          x: prevPart.x + (direction!==undefined ? _DIR_DELTA[direction].x : 0),
-          y: prevPart.y + (direction!==undefined ? _DIR_DELTA[direction].y : 0),
-          color: ['#f0f','#00f','#ddd'][Math.floor(3*Math.random())]
-        }
-      }
-
       _installListeners() {
-        this.generateGrid(4);
+        this.generateGrid(8);
         console.log("grid", this.grid);
 
         console.log(document);
         document.addEventListener('keydown', evt => {
           if(!evt.repeat) {
             console.log('down', evt);
-            for(let dir in _KEY_DIR) {
-              if(_KEY_DIR[dir].includes(evt.code)) {
-                if(this.direction !== dir && Math.abs(this.direction-dir)!=180) {
-                  this.direction = dir;
-                  this.playEffect('splash');
-                }
-                break;
-              }
+            const dir = _KEY_DIR[evt.code];
+            if(dir !== undefined) {
+                this.changeDirection(dir);
+                // this.playEffect('splash'); // base on event
             }
           }
         });
