@@ -36,7 +36,7 @@
               type: Number,
               value: 800
             }
-          }
+          } 
         };
       }
 
@@ -44,11 +44,6 @@
         super.connectedCallback();
 
         this.notifyPath('snake');
-        let count = 20;
-        setInterval(_ => {
-          this.move(count-->0);
-          requestAnimationFrame(this.render.bind(this));
-        }, 250);
 
         this.ctx = this.$.canvas.getContext('2d');
 
@@ -75,8 +70,27 @@
           console.log('up', evt);
         });
 
+        this.addEventListener('snake-collision', data => {
+          console.log("snake-collision", data);
+          // play crash sounds
+          // init some nasty animation...
+        });
+
         // load sounds
         this.loadEffect('./splash1.ogg', 'splash')
+      }
+
+      stateChanged(state) {
+        console.log("State -> ",state);
+        if(state === "running") {
+          let count = 20;
+          this.gameTimer = setInterval(_ => {
+            this.move(count-->0);
+            requestAnimationFrame(this.render.bind(this));
+          }, 250);
+        } else if(state === "gameover") {
+          clearInterval(this.gameTimer);
+        }
       }
 
       render() {

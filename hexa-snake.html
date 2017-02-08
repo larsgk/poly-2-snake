@@ -19,9 +19,13 @@ const HexaSnake = subclass => class extends subclass {
                 direction: {
                     type: Number,
                     value: 0
+                },
+                state: {
+                    type: String,
+                    value: "init"
                 }
-            }//,
-            //observers: [ 'gridChanged(grid)' ]
+            },
+            observers: [ 'stateChanged(state)' ]
         }
     }
 
@@ -29,6 +33,7 @@ const HexaSnake = subclass => class extends subclass {
         super.connectedCallback();
 
         // todo: snakey functionality (movement, eating, etc.)
+        this.state="running";  // should be init...
     }
 
     disconnectedCallback() {
@@ -69,6 +74,13 @@ const HexaSnake = subclass => class extends subclass {
 
         // do stuff
         //console.log(newHead);
+        // check for collision
+ 
+        if(this.grid[newHead.row][newHead.col].snake) {
+            this.dispatchEvent(new CustomEvent('snake-collision'), {hit: 'self'}); // need to make walls, etc.
+            this.state = "gameover";
+            return;
+        }
 
         this.grid[newHead.row][newHead.col].snake = newHead;
 
@@ -82,6 +94,7 @@ const HexaSnake = subclass => class extends subclass {
 
     getNewHead() {
         // use the position, directon [0,60,120,180,240,300] + knowledge about the grid to move, be blocked, follow portal, etc.
+        // TODO: handle sharp corners correctly...
         let row = this.snake[0].row;
         let col = this.snake[0].col;
         switch(this.direction) {
