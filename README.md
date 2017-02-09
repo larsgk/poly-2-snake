@@ -6,7 +6,11 @@ TODO:
 
 * triangular coords (including grid/gamearea)
 * Proper color maps
-* Collision detection, etc.
-* Input: keyboard, mouse, touch, accelerometer (incl. WebUSB & empiriKit|MOTION)
-* Decision on canvas (full control, 2D or 3D) vs svg (clean if works) vs dom elements (tricky but cool)
 * WebAudio stuffs
+* Input from:
+  * keyboard
+  * mouse
+  * touch
+  * WebUSB (using empiriKit|MOTION https://twitter.com/denladeside/status/818717316443676672 )
+  * WebBluetooth (when I obtain a BLE device with accelerometer - any donations? ;))
+  * Voice (ok... maaaaaybe ;))
