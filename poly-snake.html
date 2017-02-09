@@ -62,6 +62,10 @@
             if(dir !== undefined) {
                 this.changeDirection(dir);
                 this.playEffect('splash'); // base on event
+            } else {
+              if(evt.code === 'KeyP') {
+                this.togglePause();
+              }
             }
           }
         });
@@ -75,27 +79,40 @@
           // init some nasty animation...
         });
 
+        this.addEventListener('snake-ate', data => {
+          console.log("snake-ate", data);
+          // play eating sounds
+        });
+
         // load sounds
         this.loadEffect('./splash1.ogg', 'splash')
+      }
+
+      gameLoop() {
+          this.gameTimer = setInterval(_ => {
+            if(this.state === 'running') {
+              this.move();
+            }
+            requestAnimationFrame(this.render.bind(this));
+          }, 200);
       }
 
       stateChanged(state) {
         console.log("State -> ",state);
         if(state === "running") {
-          let count = 20;
-          this.gameTimer = setInterval(_ => {
-            this.move(count-->0);
-            requestAnimationFrame(this.render.bind(this));
-          }, 250);
+          if(!this.gameTimer) {
+            this.gameLoop();
+          }
         } else if(state === "gameover") {
           clearInterval(this.gameTimer);
+          this.gameTimer=null;
         }
       }
 
       render() {
         var ctx = this.$.canvas.getContext('2d');
         // render the grid
-        //clear
+        // clear
         ctx.clearRect(0,0,this.width,this.height);
         const sin60 = Math.sin(Math.PI/3);
         const dx = this.width / (this._num_cols+1);

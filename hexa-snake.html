@@ -68,8 +68,9 @@ const HexaSnake = subclass => class extends subclass {
         this.state="running";        
     }
 
-    pause() {
-        this.state="paused";        
+    togglePause() {
+        if(this.state === 'running') this.state='paused';
+        else if(this.state === 'paused') this.state='running';        
     }
 
     placeFood(size) {
@@ -116,11 +117,10 @@ const HexaSnake = subclass => class extends subclass {
     }
 
     eatFood() {
-        this.eaten = this.food.size;
+        this.eaten += this.food.size;
+        this.score += this.food.size;
         
-        this.score+=this.eaten;
-        
-        this.dispatchEvent(new CustomEvent('snake-ate'), {value: this.eaten}); // for audio, etc.
+        this.dispatchEvent(new CustomEvent('snake-ate'), {value: this.food.size}); // for audio, etc.
             
         this.food.tiles.forEach(pos => {this.grid[pos.row][pos.col].food = null;})
         this.food = null;
