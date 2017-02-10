@@ -91,7 +91,7 @@ const HexaSnake = subclass => class extends subclass {
             return true;
         } else if (size === 4) {
             // if the snake doesn't leave enough space - tough luck ;)
-            for (let attempts=5; attempts; --attempts) {
+            for (let attempts=5; attempts; attempts--) {
                 let pos = this.getRandomFreeLocation();
                 if(!pos) return false;
 
@@ -134,7 +134,7 @@ const HexaSnake = subclass => class extends subclass {
             pos = null,
             margin = 2;  // don't place food close to the edge
 
-        while(--attempts) {
+        while(attempts--) {
             pos = {
                 col: margin + Math.floor((this._num_cols-2*margin)*Math.random()),
                 row: margin + Math.floor((this._num_rows-2*margin)*Math.random()),
