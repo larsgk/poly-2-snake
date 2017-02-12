@@ -4,9 +4,8 @@ Just wait - it will be awesome (hopefully :))
 
 TODO:
 
-* triangular coords (including grid/gamearea)
 * Proper color maps
-* WebAudio stuffs
+* WebAudio stuffs (more effects)
 * Input from:
   * keyboard
   * mouse

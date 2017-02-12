@@ -115,7 +115,11 @@
             if(cell.collision) {
               ctx.fillStyle = 'yellow';
             } else if(cell.snake.length) {
-              ctx.fillStyle = ['#f44','#e22','#d11'][Math.floor(3*Math.random())];
+              if(cell.snake[0].fold){
+                ctx.fillStyle = ['#833','#722','#611'][Math.floor(3*Math.random())];
+              } else {
+                ctx.fillStyle = ['#f44','#e22','#d11'][Math.floor(3*Math.random())];
+              }
             } else if(cell.food) {
               ctx.fillStyle = cell.food.colors[Math.floor(cell.food.colors.length*Math.random())];
             } else {

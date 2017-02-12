@@ -30,6 +30,10 @@ const HexaSnake = subclass => class extends subclass {
                 score: {
                     type: Number,
                     value: 0
+                },
+                fold: {
+                    type: Boolean,
+                    value: false
                 }
             },
             observers: [ 'stateChanged(state)' ]
@@ -194,6 +198,7 @@ const HexaSnake = subclass => class extends subclass {
         // going in the same direction and directly 180 degree turn not valid
         if (this.snake[0].direction !== direction && Math.abs(this.snake[0].direction-direction)!=180) {
             this.direction = direction;
+            this.fold = !this.fold;
         }
     }
 
@@ -261,7 +266,7 @@ const HexaSnake = subclass => class extends subclass {
                 console.log(`Unknown direction: ${this.direction}`);
         }
 
-        return {row:row,col:col,direction:this.direction};
+        return {row:row,col:col,direction:this.direction,fold:this.fold};
     }
 }
 </script>
