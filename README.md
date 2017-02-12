@@ -2,6 +2,9 @@
 
 Just wait - it will be awesome (hopefully :))
 
+See the current work in progress here: https://larsgk.github.io/poly-2-snake/
+
+
 TODO:
 
 * Proper color maps
