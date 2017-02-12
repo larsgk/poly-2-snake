@@ -1,0 +1,36 @@
+<html><head><link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../shadow.html">
+
+
+
+</head><body><dom-module id="paper-material">
+  <template>
+    <style>
+      :host(.paper-material), .paper-material {
+        display: block;
+        position: relative;
+      }
+
+      :host(.paper-material[elevation="1"]), .paper-material[elevation="1"] {
+        @apply --shadow-elevation-2dp;
+      }
+
+      :host(.paper-material[elevation="2"]), .paper-material[elevation="2"] {
+        @apply --shadow-elevation-4dp;
+      }
+
+      :host(.paper-material[elevation="3"]), .paper-material[elevation="3"] {
+        @apply --shadow-elevation-6dp;
+      }
+
+      :host(.paper-material[elevation="4"]), .paper-material[elevation="4"] {
+        @apply --shadow-elevation-8dp;
+      }
+
+      :host(.paper-material[elevation="5"]), .paper-material[elevation="5"] {
+        @apply --shadow-elevation-16dp;
+      }
+    </style>
+  </template>
+</dom-module>
+</body></html>

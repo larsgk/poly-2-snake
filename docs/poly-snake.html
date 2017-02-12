@@ -1,0 +1,154 @@
+<html><head><link rel="import" href="bower_components/polymer/polymer-element.html">
+<link rel="import" href="bower_components/paper-button/paper-button.html">
+<link rel="import" href="poly-snake-part.html">
+<link rel="import" href="hexa-snake.html">
+<link rel="import" href="audio-mixin.html">
+<link rel="import" href="input-ctrl.html">
+
+</head><body><dom-module id="poly-snake">
+  <template>
+  <h2>Score: [[score]]</h2>
+
+  <canvas id="canvas" width="[[width]]" height="[[height]]"></canvas>
+  </template>
+
+  <script>
+    class PolySnake extends InputCtrl(AudioMixin(HexaSnake(Polymer.Element))) {
+      static get is() { return 'poly-snake' }
+
+      static get config() {
+        return {
+          properties: {
+            width: {
+              type: Number,
+              value: 850
+            },
+            height: {
+              type: Number,
+              value: 850
+            }
+          } 
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+
+        this.notifyPath('snake');
+
+        this.ctx = this.$.canvas.getContext('2d');
+
+        requestAnimationFrame(this._installListeners.bind(this));
+      }
+
+      _installListeners() {
+        console.log("grid", this.grid);
+        this.render();
+
+        this.addEventListener('snake-collision', data => {
+          console.log("snake-collision", data);
+          // play crash sounds
+          // init some nasty animation...
+        });
+
+        this.addEventListener('input-direction', data => {
+          this.changeDirection(data.detail.value);
+          this.playEffect('splash'); // base on event
+        });
+
+        this.addEventListener('input-toggle-pause', data => {
+          this.togglePause();
+        });
+
+        this.addEventListener('snake-ate', data => {
+          console.log("snake-ate", data.detail);
+          // play eating sounds
+        });
+
+        // load sounds
+        this.loadEffect('./splash1.ogg', 'splash')
+        // missing sounds:
+        // 'folding paper' (when the snake turns)
+        // 'tape roll pulled' (when the snake extends)
+        // 'cut paper' (when eating)
+        // 'dump crumbled paper' (when food is dumped/placed)
+      }
+
+      gameLoop() {
+          this.gameTimer = setInterval(_ => {
+            if(this.state === 'running') {
+              this.move();
+            }
+            requestAnimationFrame(this.render.bind(this));
+          }, 200);
+      }
+
+      stateChanged(state) {
+        console.log("State -> ",state);
+        if(state === "running") {
+          if(!this.gameTimer) {
+            this.gameLoop();
+          }
+        } else if(state === "gameover") {
+          clearInterval(this.gameTimer);
+          this.gameTimer=null;
+        }
+      }
+
+      render() {
+        var ctx = this.$.canvas.getContext('2d');
+        // render the grid
+        // clear
+        ctx.clearRect(0,0,this.width,this.height);
+        const sin60 = Math.sin(Math.PI/3);
+        const dx = this.width / (this._num_cols+1);
+        const dy = 2 * dx * sin60;
+        const dx2 = 0.99 * dx;
+        const dy2 = 0.995 * dy * 0.5;
+        let cy = dy;
+        //console.log(`(cols,rows)=(${this._num_cols},${this._num_rows})`);
+        for(let row=0;row<this._num_rows;row++) {
+          let cx = dx;
+          for(let col=0;col<this._num_cols;col++) {
+            //ctx.fillStyle = ['#f88','#ddd','#88f'][Math.floor(Math.random()*3)];
+            let cell = this.grid[row][col];
+            if(cell.collision) {
+              ctx.fillStyle = 'yellow';
+            } else if(cell.snake.length) {
+              if(cell.snake[0].fold){
+                ctx.fillStyle = ['#833','#722','#611'][Math.floor(3*Math.random())];
+              } else {
+                ctx.fillStyle = ['#f44','#e22','#d11'][Math.floor(3*Math.random())];
+              }
+            } else if(cell.food) {
+              ctx.fillStyle = cell.food.colors[Math.floor(cell.food.colors.length*Math.random())];
+            } else {
+              ctx.fillStyle = cell.color;
+            }
+            if(cell.isUp) {
+              ctx.beginPath();
+              ctx.moveTo(cx-dx2,cy+dy2);
+              ctx.lineTo(cx,cy-dy2);
+              ctx.lineTo(cx+dx2,cy+dy2);
+              ctx.fill();
+            } else {
+              ctx.beginPath();
+              ctx.moveTo(cx-dx2,cy-dy2);
+              ctx.lineTo(cx,cy+dy2);
+              ctx.lineTo(cx+dx2,cy-dy2);
+              ctx.fill();              
+            }
+            cx+=dx;
+          }
+          cy+=dy;
+        }
+        
+      }
+
+    }
+
+    customElements.define(PolySnake.is, PolySnake);
+
+  </script>
+</dom-module>
+</body></html>

@@ -1,0 +1,273 @@
+<html><head><script>
+const HexaSnake = subclass => class extends subclass {
+    static get config() {
+        return {
+            properties: {
+                grid: {
+                    type: Array,
+                    value: null,
+                },
+                snake: {
+                    type: Array,
+                    value: null,
+                },
+                direction: {
+                    type: Number,
+                    value: 0
+                },
+                state: {
+                    type: String,
+                    value: "init"
+                },
+                food: {
+                    type: Object,
+                    value: null
+                },
+                eaten: {
+                    type: Number,
+                    value: 5
+                },
+                score: {
+                    type: Number,
+                    value: 0
+                },
+                fold: {
+                    type: Boolean,
+                    value: false
+                }
+            },
+            observers: [ 'stateChanged(state)' ]
+        }
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.generateGrid(8);
+        this.initialize();
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+    }
+
+    initialize() {
+        this.food = null;
+        this.snake = [{
+            direction: 0,
+            row:1,
+            col:2,
+            color: 'red'
+        }];
+        this.state="init";
+        this.score = 0;
+        this.eaten = 5;
+
+        setTimeout(_ => {this.placeFood(4)}, 1000);
+
+        // for now just start
+        this.play();
+    }
+
+    play() {
+        this.state="running";        
+    }
+
+    togglePause() {
+        if(this.state === 'running') this.state='paused';
+        else if(this.state === 'paused') this.state='running';        
+    }
+
+    placeFood(size) {
+        if (this.food) {
+            console.log("Food already on the field!");
+            return false;
+        }
+        // supported: 1 & 4 (todo: 6)
+        if (size === 1) {
+            let pos = this.getRandomFreeLocation();
+            if(!pos) return false;
+            this.food = {
+                size: 1,
+                colors: ['#FFFDE7','#FFECB3','#FFCC80'],
+                tiles: [pos]
+            }
+            this.grid[pos.row][pos.col].food = this.food;
+            return true;
+        } else if (size === 4) {
+            // if the snake doesn't leave enough space - tough luck ;)
+            for (let attempts=5; attempts; attempts--) {
+                let pos = this.getRandomFreeLocation();
+                if(!pos) return false;
+
+                let posarr = [
+                    pos,
+                    {col:pos.col-1,row:pos.row},
+                    {col:pos.col+1,row:pos.row},
+                    this.grid[pos.row][pos.col].isUp ? {col:pos.col,row:pos.row+1} : {col:pos.col,row:pos.row-1}
+                ];
+
+                if(this.areTilesFree(posarr)) {
+                    this.food = {
+                        size: 4,
+                        colors: ['#FFFDE7','#FFECB3','#FFCC80'],
+                        tiles: posarr
+                    }
+                    posarr.forEach(pos => {this.grid[pos.row][pos.col].food = this.food});
+                    return true;
+                }
+            }
+            
+        }
+    }
+
+    eatFood() {
+        this.eaten += this.food.size;
+        this.score += this.food.size;
+        
+        this.dispatchEvent(new CustomEvent('snake-ate', {detail: {value: this.food.size}} )); // for audio, etc.
+            
+        this.food.tiles.forEach(pos => {this.grid[pos.row][pos.col].food = null;})
+        this.food = null;
+
+        setTimeout(_ => {this.placeFood([1,4][Math.floor(2*Math.random())])}, 1000);
+    }
+
+    getRandomFreeLocation() {
+        // note: do 500 attempts, then do a sweep
+        let attempts=500,
+            pos = null,
+            margin = 2;  // don't place food close to the edge
+
+        while(attempts--) {
+            pos = {
+                col: margin + Math.floor((this._num_cols-2*margin)*Math.random()),
+                row: margin + Math.floor((this._num_rows-2*margin)*Math.random()),
+            };
+
+            if (this.isTileFree(pos))
+                return pos;
+        }
+        // todo: sweep - for now, return nothing
+    }
+
+    isTileFree(pos) {
+        let tile = this.grid[pos.row][pos.col];
+
+        return tile.snake.length === 0 && !tile.wall;
+    }
+
+    areTilesFree(arr) {
+        for(let i=0;i<arr.length;i++) {
+            if(!this.isTileFree(arr[i])) return false;
+        }
+        return true;
+    }
+
+    generateGrid(sideLength) {
+        // faster with a rectangular grid mapped to triangles
+        // (sideLength refers to the inside hexagon - might just stay with the full 'lawn' for now though)
+        this._num_cols = 4*sideLength-1;
+        this._num_rows = 2*sideLength;
+        // make a max_cols,max_rows
+        this.grid = Array(this._num_rows).fill().map(() => Array(this._num_cols).fill());
+
+        this.initTiles();
+    }
+
+    initTiles() {
+        let isUp = (this._num_rows&0x3) !== 0; // flip every 'triangle'
+
+        for (let row=0;row<this._num_rows;row++) {
+            for (let col=0;col<this._num_cols;col++) {
+                this.grid[row][col] = {
+                    color: ['#8f8','#3d3','#6e6'][Math.floor(3*Math.random())],
+                    snake: [],
+                    isUp: isUp
+                };
+                isUp=!isUp;
+            }
+        }
+
+        // make "portals" (on the open sides of the hexagon)
+        // make a border
+        // make obstacles
+        // make bg
+    }
+
+    changeDirection(direction) {
+        // going in the same direction and directly 180 degree turn not valid
+        if (this.snake[0].direction !== direction && Math.abs(this.snake[0].direction-direction)!=180) {
+            this.direction = direction;
+            this.fold = !this.fold;
+        }
+    }
+
+    move() {
+        // send events out on fruit eaten, wall/own hit, etc. 
+        const newHead = this.getNewHead();
+
+        // check for collision
+
+        const headTile = this.grid[newHead.row][newHead.col];
+
+        if (headTile.snake.length &&
+            headTile.snake[0] != this.snake[1]) { // if the angle is 60 deg, there is a chance you hit yourself (fold paper?)
+            this.dispatchEvent(new CustomEvent('snake-collision', {detail: {hit: 'self'}} )); // need to make walls, etc.
+            this.state = "gameover";
+            headTile.collision = true;
+            return;
+        } else if (headTile.food) {
+            // yum yum
+            this.eatFood();
+        }
+
+        // add head of snake to field
+        headTile.snake.unshift(newHead);
+
+        this.unshift('snake',newHead);
+        if (!this.eaten) {
+            let tail = this.snake.slice(-1)[0];
+            this.grid[tail.row][tail.col].snake.pop(); // there may be overlaps/folds
+            this.pop('snake');
+        } else {
+            this.eaten--;
+        }
+    }
+
+    getNewHead() {
+        // use the position, directon [0,60,120,180,240,300] + knowledge about the grid to move, be blocked, follow portal, etc.
+        // TODO: handle sharp corners correctly...(with folds the right places...sorta)
+        let row = this.snake[0].row;
+        let col = this.snake[0].col;
+        switch(this.direction) {
+            case 0:
+                col = (col+1)%this._num_cols;
+                break;
+            case 60:
+                if ((row+col+1)&1) row = (row+this._num_rows-1)%this._num_rows;
+                else col = (col+1)%this._num_cols;
+                break;
+            case 120:
+                if ((row+col+1)&1) row = (row+this._num_rows-1)%this._num_rows;
+                else {col = (col+this._num_cols-1)%this._num_cols; this.snake[0].fold = this.fold;} // quick fold experiment
+                break;
+            case 180:
+                col = (col+this._num_cols-1)%this._num_cols;
+                break;
+            case 240:
+                if ((row+col)&1) row = (row+1)%this._num_rows;
+                else col = (col+this._num_cols-1)%this._num_cols;
+                break;
+            case 300:
+                if ((row+col)&1) row = (row+1)%this._num_rows;
+                else col = (col+1)%this._num_cols;
+                break;
+            default:
+                console.log(`Unknown direction: ${this.direction}`);
+        }
+
+        return {row:row,col:col,direction:this.direction,fold:this.fold};
+    }
+}
+</script>
+</head><body></body></html>

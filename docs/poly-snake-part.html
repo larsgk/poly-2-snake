@@ -1,0 +1,56 @@
+<html><head><link rel="import" href="bower_components/polymer/polymer-element.html">
+<link rel="import" href="bower_components/paper-button/paper-button.html">
+
+
+</head><body><dom-module id="poly-snake-part">
+  <template>
+    [[data.x]],[[data.y]]
+  </template>
+
+  <script>
+    class PolySnakePart extends Polymer.Element {
+      static get is() { return 'poly-snake-part' }
+
+      static get config() {
+        return {
+          properties: {
+            data: {
+              type: Object,
+              value: {}
+            },
+            ctx: {
+              type: Object,
+              value: null
+            }
+          },
+          observers: ['_dataChanged(data)']
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        console.log("New allocation");
+      }
+
+      _dataChanged(data) {
+        //console.log("Data changed", data)
+        requestAnimationFrame(this.render.bind(this));
+      }
+
+      render() {
+        //console.log("render?",!!this.ctx,this.data);
+        if(!this.ctx) return;
+
+        this.ctx.beginPath();
+        this.ctx.arc(this.data.x,this.data.y,5,0,Math.PI*2,false);
+        this.ctx.fillStyle = this.data.color;
+        this.ctx.fill();
+      }
+
+    }
+
+    customElements.define(PolySnakePart.is, PolySnakePart);
+
+  </script>
+</dom-module>
+</body></html>

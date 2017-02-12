@@ -1,0 +1,45 @@
+<html><head><link rel="import" href="../utils/boot.html">
+<link rel="import" href="../utils/utils.html">
+<script>
+(function() {
+
+  'use strict';
+
+  function createNodeEventHandler(context, eventName, methodName) {
+    context = context._rootDataHost || context;
+    var handler = function(e) {
+      if (context[methodName]) {
+        context[methodName](e, e.detail);
+      } else {
+        console.warn('listener method `' + methodName + '` not defined');
+      }
+    };
+    return handler;
+  }
+
+  Polymer.EventListeners = Polymer.Utils.dedupingMixin(function(superClass) {
+
+    return class EventListeners extends superClass {
+
+      _addMethodEventListenerToNode(node, eventName, methodName, context) {
+        context = context || node;
+        var handler = createNodeEventHandler(context, eventName, methodName);
+        this._addEventListenerToNode(node, eventName, handler);
+        return handler;
+      }
+
+      _addEventListenerToNode(node, eventName, handler) {
+        node.addEventListener(eventName, handler);
+      }
+
+      _removeEventListenerFromNode(node, eventName, handler) {
+        node.removeEventListener(eventName, handler);
+      }
+
+    }
+
+  });
+
+})();
+</script>
+</head><body></body></html>
