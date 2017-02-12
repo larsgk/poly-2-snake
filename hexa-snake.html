@@ -236,7 +236,7 @@ const HexaSnake = subclass => class extends subclass {
 
     getNewHead() {
         // use the position, directon [0,60,120,180,240,300] + knowledge about the grid to move, be blocked, follow portal, etc.
-        // TODO: handle sharp corners correctly...
+        // TODO: handle sharp corners correctly...(with folds the right places...sorta)
         let row = this.snake[0].row;
         let col = this.snake[0].col;
         switch(this.direction) {
@@ -249,7 +249,7 @@ const HexaSnake = subclass => class extends subclass {
                 break;
             case 120:
                 if ((row+col+1)&1) row = (row+this._num_rows-1)%this._num_rows;
-                else col = (col+this._num_cols-1)%this._num_cols;
+                else {col = (col+this._num_cols-1)%this._num_cols; this.snake[0].fold = this.fold;} // quick fold experiment
                 break;
             case 180:
                 col = (col+this._num_cols-1)%this._num_cols;
