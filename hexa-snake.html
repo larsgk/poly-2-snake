@@ -120,7 +120,7 @@ const HexaSnake = subclass => class extends subclass {
         this.eaten += this.food.size;
         this.score += this.food.size;
         
-        this.dispatchEvent(new CustomEvent('snake-ate'), {value: this.food.size}); // for audio, etc.
+        this.dispatchEvent(new CustomEvent('snake-ate', {detail: {value: this.food.size}} )); // for audio, etc.
             
         this.food.tiles.forEach(pos => {this.grid[pos.row][pos.col].food = null;})
         this.food = null;
@@ -207,7 +207,7 @@ const HexaSnake = subclass => class extends subclass {
 
         if (headTile.snake.length &&
             headTile.snake[0] != this.snake[1]) { // if the angle is 60 deg, there is a chance you hit yourself (fold paper?)
-            this.dispatchEvent(new CustomEvent('snake-collision'), {hit: 'self'}); // need to make walls, etc.
+            this.dispatchEvent(new CustomEvent('snake-collision', {detail: {hit: 'self'}} )); // need to make walls, etc.
             this.state = "gameover";
             headTile.collision = true;
             return;

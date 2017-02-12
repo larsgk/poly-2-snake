@@ -1,0 +1,90 @@
+<script>
+const InputCtrl = (_ => {
+  const _InputCtrl = subclass => class extends subclass {
+    static get config() {
+      return {
+        properties: {
+          data: {
+            type: Object,
+            value: _InputCtrl["data"],
+          }
+        },
+        observers: [ 'dataChanged(data)' ]
+      }
+    }
+
+    dataChanged(data) {
+      _InputCtrl.notifyPath('data');
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      _InputCtrl["instances"].push(this);
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      const i = InputCtrl["instances"].indexOf(this);
+      if (i >= 0) {
+          InputCtrl["instances"].splice(i, 1);
+      }
+    }
+  };
+
+  Object.defineProperty(_InputCtrl, "data", {
+    value: {
+        effects: {},
+        music: {},
+        muted: false,
+        ctx: new (window.AudioConext || window.webkitAudioContext)()
+    },
+    writable: false,
+    enumerable: false,
+    configurable: false
+  });
+  Object.defineProperty(_InputCtrl, "instances", {
+    value: [],
+    writable: false,
+    enumerable: false,
+    configurable: false
+  });
+
+  _InputCtrl.notifyPath = function(path) {
+    _InputCtrl["instances"].forEach(instance => instance.notifyPath(path))
+  }
+
+  _InputCtrl.dispatchEvent = function(evt,data) {
+    // TODO: investigate if it's ok to reuse - or a new event should be made for each
+    _InputCtrl["instances"].forEach(instance => instance.dispatchEvent(evt,data));
+  }
+
+  // keyboard handler
+  const _KEY_DIR = {
+    "KeyD":   0,
+    "KeyE":  60,
+    "KeyW": 120,
+    "KeyA": 180,
+    "KeyZ": 240,
+    "KeyX": 300 
+  };
+
+  document.addEventListener('keydown', evt => {
+    if(!evt.repeat) {
+      console.log('down', evt);
+      const dir = _KEY_DIR[evt.code];
+      if(dir !== undefined) {
+        _InputCtrl.dispatchEvent(new CustomEvent('input-direction', {detail: {value: dir}}));
+
+      } else if(evt.code === 'KeyP') {
+        _InputCtrl.dispatchEvent(new CustomEvent('input-toggle-pause', {}));
+      }
+    }
+  });
+  document.addEventListener('keyup', evt => {
+    console.log('up', evt);
+  });
+
+  return _InputCtrl;
+})();
+
+</script>

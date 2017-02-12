@@ -3,6 +3,7 @@
 <link rel="import" href="poly-snake-part.html">
 <link rel="import" href="hexa-snake.html">
 <link rel="import" href="audio-mixin.html">
+<link rel="import" href="input-ctrl.html">
 
 <dom-module id="poly-snake">
   <template>
@@ -12,17 +13,7 @@
   </template>
 
   <script>
-
-    const _KEY_DIR = {
-      "KeyD":   0,
-      "KeyE":  60,
-      "KeyW": 120,
-      "KeyA": 180,
-      "KeyZ": 240,
-      "KeyX": 300 
-    };
-
-    class PolySnake extends AudioMixin(HexaSnake(Polymer.Element)) {
+    class PolySnake extends InputCtrl(AudioMixin(HexaSnake(Polymer.Element))) {
       static get is() { return 'poly-snake' }
 
       static get config() {
@@ -54,33 +45,23 @@
         console.log("grid", this.grid);
         this.render();
 
-        console.log(document);
-        document.addEventListener('keydown', evt => {
-          if(!evt.repeat) {
-            console.log('down', evt);
-            const dir = _KEY_DIR[evt.code];
-            if(dir !== undefined) {
-                this.changeDirection(dir);
-                this.playEffect('splash'); // base on event
-            } else {
-              if(evt.code === 'KeyP') {
-                this.togglePause();
-              }
-            }
-          }
-        });
-        document.addEventListener('keyup', evt => {
-          console.log('up', evt);
-        });
-
         this.addEventListener('snake-collision', data => {
           console.log("snake-collision", data);
           // play crash sounds
           // init some nasty animation...
         });
 
+        this.addEventListener('input-direction', data => {
+          this.changeDirection(data.detail.value);
+          this.playEffect('splash'); // base on event
+        });
+
+        this.addEventListener('input-toggle-pause', data => {
+          this.togglePause();
+        });
+
         this.addEventListener('snake-ate', data => {
-          console.log("snake-ate", data);
+          console.log("snake-ate", data.detail);
           // play eating sounds
         });
 
