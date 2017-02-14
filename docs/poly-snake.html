@@ -80,7 +80,7 @@
               this.move();
             }
             requestAnimationFrame(this.render.bind(this));
-          }, 200);
+          }, 150);
       }
 
       stateChanged(state) {
@@ -116,9 +116,9 @@
               ctx.fillStyle = 'yellow';
             } else if(cell.snake && cell.snake.length) {
               if(cell.snake[0].fold){
-                ctx.fillStyle = ['#833','#722','#611'][Math.floor(3*Math.random())];
+                ctx.fillStyle = ['#0d47a1','#2055a8'][Math.floor(2*Math.random())];
               } else {
-                ctx.fillStyle = ['#f44','#e22','#d11'][Math.floor(3*Math.random())];
+                ctx.fillStyle = ['#66aeed','#54a4eb','#429be9','#2b8fe7','#1e88e5'][Math.floor(5*Math.random())];
               }
             } else if(cell.food) {
               ctx.fillStyle = cell.food.colors[Math.floor(cell.food.colors.length*Math.random())];

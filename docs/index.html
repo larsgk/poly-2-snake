@@ -8572,15 +8572,17 @@ const HexaSnake = subclass => class extends subclass {
         this.initTiles();
     }
 
-    createCell(type) {
+    createCell(type, fraction) {
+        if(fraction === undefined)
+            var fraction = Math.random();
         if(type === "field") {
             return {
-                color: ['#8f8','#3d3','#6e6'][Math.floor(3*Math.random())],
+                color: ['#ffffff','#f9f9f9','#fbfbfb'][Math.floor(3*Math.random())],
                 snake: [],
             }
         } else if(type === "wall") {
             return {
-                color: ['#777','#666','#555'][Math.floor(3*Math.random())],
+                color: ['#f97d9a','#f8688a','#f75279','#f52757'][Math.floor(3*fraction)],
                 wall: true
             }
         } else {
@@ -8609,8 +8611,8 @@ const HexaSnake = subclass => class extends subclass {
                     this.grid[rowc-rowd][col] = this.createCell();
                     this.grid[rowc+rowd+1][col] = this.createCell();
                 } else {
-                    this.grid[rowc-rowd][col] = this.createCell("wall");
-                    this.grid[rowc+rowd+1][col] = this.createCell("wall");
+                    this.grid[rowc-rowd][col] = this.createCell("wall",(rowd/(1.01*rowc)));
+                    this.grid[rowc+rowd+1][col] = this.createCell("wall",(rowd/(1.01*rowc)));
                 }
                 this.grid[rowc-rowd][col].isUp = !isUp;
                 this.grid[rowc+rowd+1][col].isUp = isUp;
@@ -8999,7 +9001,7 @@ const InputCtrl = (_ => {
               this.move();
             }
             requestAnimationFrame(this.render.bind(this));
-          }, 200);
+          }, 150);
       }
 
       stateChanged(state) {
@@ -9035,9 +9037,9 @@ const InputCtrl = (_ => {
               ctx.fillStyle = 'yellow';
             } else if(cell.snake && cell.snake.length) {
               if(cell.snake[0].fold){
-                ctx.fillStyle = ['#833','#722','#611'][Math.floor(3*Math.random())];
+                ctx.fillStyle = ['#0d47a1','#2055a8'][Math.floor(2*Math.random())];
               } else {
-                ctx.fillStyle = ['#f44','#e22','#d11'][Math.floor(3*Math.random())];
+                ctx.fillStyle = ['#66aeed','#54a4eb','#429be9','#2b8fe7','#1e88e5'][Math.floor(5*Math.random())];
               }
             } else if(cell.food) {
               ctx.fillStyle = cell.food.colors[Math.floor(cell.food.colors.length*Math.random())];

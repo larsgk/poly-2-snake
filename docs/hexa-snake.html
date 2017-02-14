@@ -174,15 +174,17 @@ const HexaSnake = subclass => class extends subclass {
         this.initTiles();
     }
 
-    createCell(type) {
+    createCell(type, fraction) {
+        if(fraction === undefined)
+            var fraction = Math.random();
         if(type === "field") {
             return {
-                color: ['#8f8','#3d3','#6e6'][Math.floor(3*Math.random())],
+                color: ['#ffffff','#f9f9f9','#fbfbfb'][Math.floor(3*Math.random())],
                 snake: [],
             }
         } else if(type === "wall") {
             return {
-                color: ['#777','#666','#555'][Math.floor(3*Math.random())],
+                color: ['#f97d9a','#f8688a','#f75279','#f52757'][Math.floor(3*fraction)],
                 wall: true
             }
         } else {
@@ -211,8 +213,8 @@ const HexaSnake = subclass => class extends subclass {
                     this.grid[rowc-rowd][col] = this.createCell();
                     this.grid[rowc+rowd+1][col] = this.createCell();
                 } else {
-                    this.grid[rowc-rowd][col] = this.createCell("wall");
-                    this.grid[rowc+rowd+1][col] = this.createCell("wall");
+                    this.grid[rowc-rowd][col] = this.createCell("wall",(rowd/(1.01*rowc)));
+                    this.grid[rowc+rowd+1][col] = this.createCell("wall",(rowd/(1.01*rowc)));
                 }
                 this.grid[rowc-rowd][col].isUp = !isUp;
                 this.grid[rowc+rowd+1][col].isUp = isUp;
