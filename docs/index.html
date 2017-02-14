@@ -8440,7 +8440,7 @@ const HexaSnake = subclass => class extends subclass {
 
     connectedCallback() {
         super.connectedCallback();
-        this.generateGrid(8);
+        this.generateGrid(10);
         this.initialize();
     }
 
@@ -8452,8 +8452,8 @@ const HexaSnake = subclass => class extends subclass {
         this.food = null;
         this.snake = [{
             direction: 0,
-            row:1,
-            col:2,
+            row:Math.floor(this._num_rows/2),
+            col:Math.floor(this._num_cols/3),
             color: 'red'
         }];
         this.state="init";
@@ -8551,7 +8551,7 @@ const HexaSnake = subclass => class extends subclass {
     isTileFree(pos) {
         let tile = this.grid[pos.row][pos.col];
 
-        return tile.snake.length === 0 && !tile.wall;
+        return !tile.wall && tile.snake && tile.snake.length === 0 ;
     }
 
     areTilesFree(arr) {
@@ -8572,18 +8572,52 @@ const HexaSnake = subclass => class extends subclass {
         this.initTiles();
     }
 
+    createCell(type) {
+        if(type === "field") {
+            return {
+                color: ['#8f8','#3d3','#6e6'][Math.floor(3*Math.random())],
+                snake: [],
+            }
+        } else if(type === "wall") {
+            return {
+                color: ['#777','#666','#555'][Math.floor(3*Math.random())],
+                wall: true
+            }
+        } else {
+            return {
+                color: 'transparent'
+            }
+        }
+    }
+
     initTiles() {
+        // Make a hexagonal field with walls like '< >'
         let isUp = (this._num_rows&0x3) !== 0; // flip every 'triangle'
 
-        for (let row=0;row<this._num_rows;row++) {
+        let walltest = 0,
+            coltest;
+
+        let rowc = this._num_rows/2-1,
+            rcol = this._num_cols-1;
+        
+        for (let rowd=0;rowd<=rowc;rowd++) {
             for (let col=0;col<this._num_cols;col++) {
-                this.grid[row][col] = {
-                    color: ['#8f8','#3d3','#6e6'][Math.floor(3*Math.random())],
-                    snake: [],
-                    isUp: isUp
-                };
+                if(col > rowd+1 && col < rcol-1) {
+                    this.grid[rowc-rowd][col] = this.createCell("field");
+                    this.grid[rowc+rowd+1][col] = this.createCell("field");
+                } else if(col < rowd || col > rcol) {
+                    this.grid[rowc-rowd][col] = this.createCell();
+                    this.grid[rowc+rowd+1][col] = this.createCell();
+                } else {
+                    this.grid[rowc-rowd][col] = this.createCell("wall");
+                    this.grid[rowc+rowd+1][col] = this.createCell("wall");
+                }
+                this.grid[rowc-rowd][col].isUp = !isUp;
+                this.grid[rowc+rowd+1][col].isUp = isUp;
                 isUp=!isUp;
             }
+            walltest++;
+            rcol--;
         }
 
         // make "portals" (on the open sides of the hexagon)
@@ -8608,8 +8642,9 @@ const HexaSnake = subclass => class extends subclass {
 
         const headTile = this.grid[newHead.row][newHead.col];
 
-        if (headTile.snake.length &&
-            headTile.snake[0] != this.snake[1]) { // if the angle is 60 deg, there is a chance you hit yourself (fold paper?)
+        if (headTile.wall || 
+            (headTile.snake.length &&
+            headTile.snake[0] != this.snake[1])) { // if the angle is 60 deg, there is a chance you hit yourself (fold paper?)
             this.dispatchEvent(new CustomEvent('snake-collision', {detail: {hit: 'self'}} )); // need to make walls, etc.
             this.state = "gameover";
             headTile.collision = true;
@@ -8674,17 +8709,17 @@ const AudioMixin = (_ => {
       static get config() {
       return {
         properties: {
-          data: {
+          audioMixinData: {
             type: Object,
-            value: _AudioMixin["data"],
+            value: _AudioMixin["audioMixinData"],
           }
         },
-        observers: [ 'dataChanged(data)' ]
+        observers: [ 'dataChanged(audioMixinData)' ]
       }
     }
 
-    dataChanged(data) {
-      _AudioMixin.notifyPath('data');
+    dataChanged(audioMixinData) {
+      _AudioMixin.notifyPath('audioMixinData');
     }
 
     connectedCallback() {
@@ -8701,24 +8736,25 @@ const AudioMixin = (_ => {
     }
 
     loadEffect(url, name) {
+        console.log(this.data);
         var getSound = new XMLHttpRequest();
         getSound.open("GET", url, true);
         getSound.responseType = "arraybuffer";
         getSound.onload = _ => {
-            this.data.ctx.decodeAudioData(getSound.response, buffer => {
-                this.data.effects[name] = buffer;
+            this.audioMixinData.ctx.decodeAudioData(getSound.response, buffer => {
+                this.audioMixinData.effects[name] = buffer;
             });
         }
         getSound.send();
     }
 
     loadMusic(url, name) {
-        this.data.music[name] = new Audio(url);
+        this.audioMixinData.music[name] = new Audio(url);
     }
 
     playMusic(name, loop, volume) {
         // assuming Audio media element (TODO: stop music...)
-        var snd = this.data.music[name];
+        var snd = this.audioMixinData.music[name];
         if(!snd)
             return;
 
@@ -8744,7 +8780,7 @@ const AudioMixin = (_ => {
 
     muteMusic(name, muted) {
         // assuming Audio media element
-        var snd = this.data.sounds[name];
+        var snd = this.audioMixinData.sounds[name];
         if(!snd)
             return;
 
@@ -8756,28 +8792,28 @@ const AudioMixin = (_ => {
 
     playEffect(name) {
         console.log("[playEffect] ", name);
-        if(this.data.muted)
+        if(this.audioMixinData.muted)
             return;
 
-        var snd = this.data.effects[name];
+        var snd = this.audioMixinData.effects[name];
         if(!snd)
             return;
         // WebAudio...
-        var playSound = this.data.ctx.createBufferSource();
+        var playSound = this.audioMixinData.ctx.createBufferSource();
         playSound.buffer = snd;
-        playSound.connect(this.data.ctx.destination);
+        playSound.connect(this.audioMixinData.ctx.destination);
         playSound.start(0);
     }
 
     setMute(muted) {
-        this.data.muted = muted;
+        this.audioMixinData.muted = muted;
 
         this.muteMusic('theme', muted); // todo handle other music than 'theme' (e.g. remember last music played)
     }
 
   };
 
-  Object.defineProperty(_AudioMixin, "data", {
+  Object.defineProperty(_AudioMixin, "audioMixinData", {
     value: {
         effects: {},
         music: {},
@@ -8838,10 +8874,6 @@ const InputCtrl = (_ => {
 
   Object.defineProperty(_InputCtrl, "data", {
     value: {
-        effects: {},
-        music: {},
-        muted: false,
-        ctx: new (window.AudioConext || window.webkitAudioContext)()
     },
     writable: false,
     enumerable: false,
@@ -9001,7 +9033,7 @@ const InputCtrl = (_ => {
             let cell = this.grid[row][col];
             if(cell.collision) {
               ctx.fillStyle = 'yellow';
-            } else if(cell.snake.length) {
+            } else if(cell.snake && cell.snake.length) {
               if(cell.snake[0].fold){
                 ctx.fillStyle = ['#833','#722','#611'][Math.floor(3*Math.random())];
               } else {

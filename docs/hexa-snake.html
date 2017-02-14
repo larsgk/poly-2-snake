@@ -42,7 +42,7 @@ const HexaSnake = subclass => class extends subclass {
 
     connectedCallback() {
         super.connectedCallback();
-        this.generateGrid(8);
+        this.generateGrid(10);
         this.initialize();
     }
 
@@ -54,8 +54,8 @@ const HexaSnake = subclass => class extends subclass {
         this.food = null;
         this.snake = [{
             direction: 0,
-            row:1,
-            col:2,
+            row:Math.floor(this._num_rows/2),
+            col:Math.floor(this._num_cols/3),
             color: 'red'
         }];
         this.state="init";
@@ -153,7 +153,7 @@ const HexaSnake = subclass => class extends subclass {
     isTileFree(pos) {
         let tile = this.grid[pos.row][pos.col];
 
-        return tile.snake.length === 0 && !tile.wall;
+        return !tile.wall && tile.snake && tile.snake.length === 0 ;
     }
 
     areTilesFree(arr) {
@@ -174,18 +174,52 @@ const HexaSnake = subclass => class extends subclass {
         this.initTiles();
     }
 
+    createCell(type) {
+        if(type === "field") {
+            return {
+                color: ['#8f8','#3d3','#6e6'][Math.floor(3*Math.random())],
+                snake: [],
+            }
+        } else if(type === "wall") {
+            return {
+                color: ['#777','#666','#555'][Math.floor(3*Math.random())],
+                wall: true
+            }
+        } else {
+            return {
+                color: 'transparent'
+            }
+        }
+    }
+
     initTiles() {
+        // Make a hexagonal field with walls like '< >'
         let isUp = (this._num_rows&0x3) !== 0; // flip every 'triangle'
 
-        for (let row=0;row<this._num_rows;row++) {
+        let walltest = 0,
+            coltest;
+
+        let rowc = this._num_rows/2-1,
+            rcol = this._num_cols-1;
+        
+        for (let rowd=0;rowd<=rowc;rowd++) {
             for (let col=0;col<this._num_cols;col++) {
-                this.grid[row][col] = {
-                    color: ['#8f8','#3d3','#6e6'][Math.floor(3*Math.random())],
-                    snake: [],
-                    isUp: isUp
-                };
+                if(col > rowd+1 && col < rcol-1) {
+                    this.grid[rowc-rowd][col] = this.createCell("field");
+                    this.grid[rowc+rowd+1][col] = this.createCell("field");
+                } else if(col < rowd || col > rcol) {
+                    this.grid[rowc-rowd][col] = this.createCell();
+                    this.grid[rowc+rowd+1][col] = this.createCell();
+                } else {
+                    this.grid[rowc-rowd][col] = this.createCell("wall");
+                    this.grid[rowc+rowd+1][col] = this.createCell("wall");
+                }
+                this.grid[rowc-rowd][col].isUp = !isUp;
+                this.grid[rowc+rowd+1][col].isUp = isUp;
                 isUp=!isUp;
             }
+            walltest++;
+            rcol--;
         }
 
         // make "portals" (on the open sides of the hexagon)
@@ -210,8 +244,9 @@ const HexaSnake = subclass => class extends subclass {
 
         const headTile = this.grid[newHead.row][newHead.col];
 
-        if (headTile.snake.length &&
-            headTile.snake[0] != this.snake[1]) { // if the angle is 60 deg, there is a chance you hit yourself (fold paper?)
+        if (headTile.wall || 
+            (headTile.snake.length &&
+            headTile.snake[0] != this.snake[1])) { // if the angle is 60 deg, there is a chance you hit yourself (fold paper?)
             this.dispatchEvent(new CustomEvent('snake-collision', {detail: {hit: 'self'}} )); // need to make walls, etc.
             this.state = "gameover";
             headTile.collision = true;

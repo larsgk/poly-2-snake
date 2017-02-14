@@ -4,17 +4,17 @@ const AudioMixin = (_ => {
       static get config() {
       return {
         properties: {
-          data: {
+          audioMixinData: {
             type: Object,
-            value: _AudioMixin["data"],
+            value: _AudioMixin["audioMixinData"],
           }
         },
-        observers: [ 'dataChanged(data)' ]
+        observers: [ 'dataChanged(audioMixinData)' ]
       }
     }
 
-    dataChanged(data) {
-      _AudioMixin.notifyPath('data');
+    dataChanged(audioMixinData) {
+      _AudioMixin.notifyPath('audioMixinData');
     }
 
     connectedCallback() {
@@ -31,24 +31,25 @@ const AudioMixin = (_ => {
     }
 
     loadEffect(url, name) {
+        console.log(this.data);
         var getSound = new XMLHttpRequest();
         getSound.open("GET", url, true);
         getSound.responseType = "arraybuffer";
         getSound.onload = _ => {
-            this.data.ctx.decodeAudioData(getSound.response, buffer => {
-                this.data.effects[name] = buffer;
+            this.audioMixinData.ctx.decodeAudioData(getSound.response, buffer => {
+                this.audioMixinData.effects[name] = buffer;
             });
         }
         getSound.send();
     }
 
     loadMusic(url, name) {
-        this.data.music[name] = new Audio(url);
+        this.audioMixinData.music[name] = new Audio(url);
     }
 
     playMusic(name, loop, volume) {
         // assuming Audio media element (TODO: stop music...)
-        var snd = this.data.music[name];
+        var snd = this.audioMixinData.music[name];
         if(!snd)
             return;
 
@@ -74,7 +75,7 @@ const AudioMixin = (_ => {
 
     muteMusic(name, muted) {
         // assuming Audio media element
-        var snd = this.data.sounds[name];
+        var snd = this.audioMixinData.sounds[name];
         if(!snd)
             return;
 
@@ -86,28 +87,28 @@ const AudioMixin = (_ => {
 
     playEffect(name) {
         console.log("[playEffect] ", name);
-        if(this.data.muted)
+        if(this.audioMixinData.muted)
             return;
 
-        var snd = this.data.effects[name];
+        var snd = this.audioMixinData.effects[name];
         if(!snd)
             return;
         // WebAudio...
-        var playSound = this.data.ctx.createBufferSource();
+        var playSound = this.audioMixinData.ctx.createBufferSource();
         playSound.buffer = snd;
-        playSound.connect(this.data.ctx.destination);
+        playSound.connect(this.audioMixinData.ctx.destination);
         playSound.start(0);
     }
 
     setMute(muted) {
-        this.data.muted = muted;
+        this.audioMixinData.muted = muted;
 
         this.muteMusic('theme', muted); // todo handle other music than 'theme' (e.g. remember last music played)
     }
 
   };
 
-  Object.defineProperty(_AudioMixin, "data", {
+  Object.defineProperty(_AudioMixin, "audioMixinData", {
     value: {
         effects: {},
         music: {},

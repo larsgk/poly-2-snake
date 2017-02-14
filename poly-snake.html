@@ -114,7 +114,7 @@
             let cell = this.grid[row][col];
             if(cell.collision) {
               ctx.fillStyle = 'yellow';
-            } else if(cell.snake.length) {
+            } else if(cell.snake && cell.snake.length) {
               if(cell.snake[0].fold){
                 ctx.fillStyle = ['#833','#722','#611'][Math.floor(3*Math.random())];
               } else {
