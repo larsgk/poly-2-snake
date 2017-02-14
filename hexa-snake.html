@@ -88,7 +88,7 @@ const HexaSnake = subclass => class extends subclass {
             if(!pos) return false;
             this.food = {
                 size: 1,
-                colors: ['#FFFDE7','#FFECB3','#FFCC80'],
+                colors: ['#FDD835','#FFB300','#FBC02D','#FFA000'],
                 tiles: [pos]
             }
             this.grid[pos.row][pos.col].food = this.food;
@@ -109,7 +109,7 @@ const HexaSnake = subclass => class extends subclass {
                 if(this.areTilesFree(posarr)) {
                     this.food = {
                         size: 4,
-                        colors: ['#FFFDE7','#FFECB3','#FFCC80'],
+                        colors: ['#FDD835','#FFB300','#FBC02D','#FFA000'],
                         tiles: posarr
                     }
                     posarr.forEach(pos => {this.grid[pos.row][pos.col].food = this.food});

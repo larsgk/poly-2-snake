@@ -47,13 +47,14 @@
 
         this.addEventListener('snake-collision', data => {
           console.log("snake-collision", data);
+          this.playEffect('splat');
           // play crash sounds
           // init some nasty animation...
         });
 
         this.addEventListener('input-direction', data => {
           this.changeDirection(data.detail.value);
-          this.playEffect('splash'); // base on event
+          this.playEffect('fold'); // TODO: base on event
         });
 
         this.addEventListener('input-toggle-pause', data => {
@@ -62,11 +63,16 @@
 
         this.addEventListener('snake-ate', data => {
           console.log("snake-ate", data.detail);
+          this.playEffect('cutpaper');
+          setTimeout(_ => this.playEffect('tape'), 500); // when adding the tail...
           // play eating sounds
         });
 
         // load sounds
-        this.loadEffect('./splash1.ogg', 'splash')
+        this.loadEffect('./fold1.ogg', 'fold')
+        this.loadEffect('./cutpaper.ogg', 'cutpaper')
+        this.loadEffect('./tape.ogg', 'tape')
+        this.loadEffect('./splat.ogg', 'splat')
         // missing sounds:
         // 'folding paper' (when the snake turns)
         // 'tape roll pulled' (when the snake extends)
