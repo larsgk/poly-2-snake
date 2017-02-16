@@ -8928,8 +8928,17 @@ const InputCtrl = (_ => {
 
 </script><dom-module id="poly-snake" assetpath="./">
   <template>
-  <h2>Score: [[score]]</h2>
+  <style>
+    h2 {
+      position:absolute;
+    }
 
+    canvas {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+  <h2>Score: [[score]]</h2>
   <canvas id="canvas" width="[[width]]" height="[[height]]"></canvas>
   </template>
 
@@ -8964,6 +8973,10 @@ const InputCtrl = (_ => {
 
       _installListeners() {
         console.log("grid", this.grid);
+
+        window.addEventListener('resize', this.calcsize.bind(this));
+        this.calcsize();
+
         this.render();
 
         this.addEventListener('snake-collision', data => {
@@ -9001,6 +9014,25 @@ const InputCtrl = (_ => {
         // 'dump crumbled paper' (when food is dumped/placed)
       }
 
+      calcsize() {
+        const iw = window.innerWidth,
+              ih = window.innerHeight;
+
+        const sin60 = Math.sin(Math.PI/3);
+
+        let ratio = sin60;
+
+        if(iw*ratio > ih) {
+          this.width = ih / ratio;
+          this.height = ih;
+        } else {
+          this.width = iw;
+          this.height = iw * ratio;
+        }
+
+        this.render();
+      }
+
       gameLoop() {
           this.gameTimer = setInterval(_ => {
             if(this.state === 'running') {
@@ -9032,7 +9064,7 @@ const InputCtrl = (_ => {
         const dy = 2 * dx * sin60;
         const dx2 = 0.99 * dx;
         const dy2 = 0.995 * dy * 0.5;
-        let cy = dy;
+        let cy = dy/2;
         //console.log(`(cols,rows)=(${this._num_cols},${this._num_rows})`);
         for(let row=0;row<this._num_rows;row++) {
           let cx = dx;
@@ -9079,16 +9111,17 @@ const InputCtrl = (_ => {
   </script>
 </dom-module>
 <style>
+  html,body {
+    margin: 0;
+    padding:0;
+  }
   poly-snake {
-    width:850px;
-    height:850px;
     position: absolute;
-    top:0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    width: auto;
+    height:auto;
 
-    margin: auto;
+    margin: 0;
+    padding:0;
   }
   </style></div>
   <poly-snake></poly-snake>
