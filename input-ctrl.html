@@ -90,7 +90,7 @@ const InputCtrl = (_ => {
   });
 
   // touch (swipe gesture) handler
-  document.addEventListener('touchstart', evt => {
+  this.addEventListener('touchstart', evt => {
     //console.log("touchstart", evt);
     _InputCtrl.data.touch.delta = {x:0,y:0};
     _InputCtrl.data.touch.origin = {
@@ -101,7 +101,7 @@ const InputCtrl = (_ => {
     evt.preventDefault();
   });
 
-  document.addEventListener('touchmove', evt => {
+  this.addEventListener('touchmove', evt => {
     //console.log("touchmove", evt);
     if(!_InputCtrl.data.touch.origin)
       return;
@@ -133,7 +133,7 @@ const InputCtrl = (_ => {
     evt.preventDefault();
   });
 
-  document.addEventListener('touchend', evt => {
+  this.addEventListener('touchend', evt => {
     //console.log("touchstart", evt);
     _InputCtrl.data.touch.delta = {x:0,y:0};
     _InputCtrl.data.touch.origin = null;
