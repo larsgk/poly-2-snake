@@ -13,19 +13,24 @@
   html,body {
     margin: 0;
     padding:0;
+    
+  }
+  .fullscreen {
+    display: flex;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
   }
   poly-snake {
-    position: absolute;
-    width: auto;
-    height:auto;
-
-    margin: 0;
-    padding:0;
+    margin-left: auto;
+    margin-right: auto;
   }
   </style>
 </head>
 
 <body>
-  <poly-snake></poly-snake>
+  <div class="fullscreen">
+    <poly-snake></poly-snake>
+  </div>
 </body>
 </html>

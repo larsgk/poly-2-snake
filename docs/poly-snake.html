@@ -1,5 +1,5 @@
 <html><head><link rel="import" href="bower_components/polymer/polymer-element.html">
-<link rel="import" href="bower_components/paper-button/paper-button.html">
+<link rel="import" href="bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="poly-snake-part.html">
 <link rel="import" href="hexa-snake.html">
 <link rel="import" href="audio-mixin.html">
@@ -7,18 +7,26 @@
 
 </head><body><dom-module id="poly-snake">
   <template>
-  <style>
-    h2 {
-      position:absolute;
-    }
+    <style>
+      h2 {
+        position:absolute;
+      }
 
-    canvas {
-      padding: 0;
-      margin: 0;
-    }
-  </style>
-  <h2>Score: [[score]]</h2>
-  <canvas id="canvas" width="[[width]]" height="[[height]]"></canvas>
+      canvas {
+        padding: 0;
+        margin: 0;
+        display: block;
+      }
+
+      paper-fab.pause {
+        position:fixed;
+        right:2em;
+        bottom:2em;
+      }
+    </style>
+    <h2>Score: [[score]]</h2>
+    <canvas id="canvas" width="[[width]]" height="[[height]]"></canvas>
+    <paper-fab icon="favorite" title="heart" class="pause"></paper-fab>
   </template>
 
   <script>
@@ -94,7 +102,7 @@
       }
 
       calcsize() {
-        const iw = window.innerWidth,
+        const iw = Math.min(window.innerWidth, 900),  // limit a bit
               ih = window.innerHeight;
 
         const sin60 = Math.sin(Math.PI/3);
