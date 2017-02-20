@@ -98,7 +98,6 @@ const InputCtrl = (_ => {
       y:evt.touches[0].clientY
     };
     _InputCtrl.notifyPath('data.touch');
-    evt.preventDefault();
   });
 
   this.addEventListener('touchmove', evt => {
@@ -130,7 +129,6 @@ const InputCtrl = (_ => {
       _InputCtrl.data.touch.delta = delta;
       _InputCtrl.notifyPath('data.touch.delta');
     }
-    evt.preventDefault();
   });
 
   this.addEventListener('touchend', evt => {
@@ -138,7 +136,6 @@ const InputCtrl = (_ => {
     _InputCtrl.data.touch.delta = {x:0,y:0};
     _InputCtrl.data.touch.origin = null;
     _InputCtrl.notifyPath('data.touch');
-    evt.preventDefault();
   });
 
   return _InputCtrl;
