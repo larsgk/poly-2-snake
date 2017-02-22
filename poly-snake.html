@@ -99,6 +99,8 @@
         // 'tape roll pulled' (when the snake extends)
         // 'cut paper' (when eating)
         // 'dump crumbled paper' (when food is dumped/placed)
+
+        requestAnimationFrame(this.gamepadApiLoop.bind(this));
       }
 
       calcsize() {

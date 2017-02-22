@@ -30,6 +30,46 @@ const InputCtrl = (_ => {
           InputCtrl["instances"].splice(i, 1);
       }
     }
+
+    gamepadApiLoop() {
+      var gps = navigator.getGamepads();
+      if (!gps) {
+        console.log('no gamepads')
+        return;
+      }
+      
+      let gp = gps[0];
+      if(gp && gp.axes && gp.axes.length > 1) {
+        let axes = {
+          x:Math.round(gp.axes[0]),
+          y:Math.round(gp.axes[1])
+        }
+        let dir;
+        if(axes.x === 1) {
+          if(axes.y === -1) {
+            dir = 60;
+          } else if(axes.y === 1) {
+            dir = 300;
+          } else {
+            dir = 0;
+          }
+        } else if(axes.x === -1) {
+          if(axes.y === -1) {
+            dir = 120;
+          } else if(axes.y === 1) {
+            dir = 240;
+          } else {
+            dir = 180;
+          }          
+        }
+        if(dir !== undefined && dir !== this.olddir) {
+          this.dispatchEvent(new CustomEvent('input-direction', {detail: {value: dir}}));
+          this.olddir = dir;
+        }
+      }
+
+      requestAnimationFrame(this.gamepadApiLoop.bind(this));
+    }
   };
 
   Object.defineProperty(_InputCtrl, "data", {
@@ -137,6 +177,15 @@ const InputCtrl = (_ => {
     _InputCtrl.data.touch.origin = null;
     _InputCtrl.notifyPath('data.touch');
   });
+
+  // gamepad
+  // this.addEventListener("gamepadconnected", evt => {
+  //   console.log('[gamepad connected]', evt);
+  // });
+
+  // this.addEventListener("gamepaddisconnected", evt => {
+  //   console.log('[gamepad disconnected]', evt);
+  // });
 
   return _InputCtrl;
 })();
