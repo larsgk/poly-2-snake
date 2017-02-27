@@ -9128,7 +9128,7 @@ const InputCtrl = (_ => {
 
         this.addEventListener('direction-changed', data => {
           console.log('direction changed', data.detail)
-            this.playEffect('fold'); // TODO: base on event
+            this.playEffect('turn'); // TODO: base on event
         });
 
         this.addEventListener('input-toggle-pause', data => {
@@ -9137,20 +9137,20 @@ const InputCtrl = (_ => {
 
         this.addEventListener('snake-ate', data => {
           console.log("snake-ate", data.detail);
-          this.playEffect('cutpaper');
+          this.playEffect('eat');
           this.$.score.classList.add("snakeate");
           setTimeout(_ => {
-            this.playEffect('tape');
+            //this.playEffect('tape');
             this.$.score.classList.remove("snakeate");            
           }, 500); // when adding the tail...
           // play eating sounds
         });
 
         // load sounds
-        this.loadEffect('./fold1.ogg', 'fold')
-        this.loadEffect('./cutpaper.ogg', 'cutpaper')
-        this.loadEffect('./tape.ogg', 'tape')
-        this.loadEffect('./splat.ogg', 'splat')
+        this.loadEffect('./turn1.ogg', 'turn')
+        this.loadEffect('./eat1.ogg', 'eat')
+        this.loadEffect('./newgame1.ogg', 'newgame')
+        this.loadEffect('./die1.ogg', 'splat')
         // missing sounds:
         // 'folding paper' (when the snake turns)
         // 'tape roll pulled' (when the snake extends)
@@ -9158,6 +9158,11 @@ const InputCtrl = (_ => {
         // 'dump crumbled paper' (when food is dumped/placed)
 
         requestAnimationFrame(this.gamepadApiLoop.bind(this));
+
+        // todo: make proper reload
+        setTimeout(_ => {
+            this.playEffect('newgame');
+        }, 200);
       }
 
       calcsize() {
