@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><link rel="import" href="shared-bundle.html">
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1,user-scalable=yes">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1,user-scalable=no">
 
   <title>Polymer 2 snake</title>
 
@@ -9281,8 +9281,12 @@ const HexaSnake = subclass => class extends subclass {
     }
 
     changeDirection(direction) {
+        const head = this.snake[0];
+        const gridHead = this.grid[head.row][head.col];
         // going in the same direction and directly 180 degree turn not valid
-        if (this.snake[0].direction !== direction && Math.abs(this.snake[0].direction-direction)!=180) {
+        if (head.direction !== direction &&  // not going in the same direction already
+            Math.abs(head.direction-direction) !== 180 && // and not 180 degree turn 
+            gridHead.snake.length < 2) { // and don't allow direction change in the middle of a paper 'fold' 
             this.direction = direction;
             this.fold = !this.fold;
         }
@@ -9293,23 +9297,27 @@ const HexaSnake = subclass => class extends subclass {
         const newHead = this.getNewHead();
 
         // check for collision
+        const newHeadTile = this.grid[newHead.row][newHead.col];
 
-        const headTile = this.grid[newHead.row][newHead.col];
-
-        if (headTile.wall || 
-            (headTile.snake.length &&
-            headTile.snake[0] != this.snake[1])) { // if the angle is 60 deg, there is a chance you hit yourself (fold paper?)
+        if (newHeadTile.wall) {
+            this.dispatchEvent(new CustomEvent('snake-collision', {detail: {hit: 'wall'}} )); // need to make walls, etc.
+            this.state = "gameover";
+            newHeadTile.collision = true;
+            return;
+        } else if (newHeadTile.snake.length && newHeadTile.snake[0] !== this.snake[0] && newHeadTile.snake[0] !== this.snake[1]) {
+            // if the angle is 60 deg, there is a chance you hit yourself (fold paper?)
+            console.log('hit tile', newHeadTile, this.snake);
             this.dispatchEvent(new CustomEvent('snake-collision', {detail: {hit: 'self'}} )); // need to make walls, etc.
             this.state = "gameover";
-            headTile.collision = true;
+            newHeadTile.collision = true;
             return;
-        } else if (headTile.food) {
+        } else if (newHeadTile.food) {
             // yum yum
             this.eatFood();
         }
 
         // add head of snake to field
-        headTile.snake.unshift(newHead);
+        newHeadTile.snake.unshift(newHead);
 
         this.unshift('snake',newHead);
         if (!this.eaten) {
@@ -9525,6 +9533,46 @@ const InputCtrl = (_ => {
           InputCtrl["instances"].splice(i, 1);
       }
     }
+
+    gamepadApiLoop() {
+      var gps = navigator.getGamepads();
+      if (!gps) {
+        console.log('no gamepads')
+        return;
+      }
+      
+      let gp = gps[0];
+      if(gp && gp.axes && gp.axes.length > 1) {
+        let axes = {
+          x:Math.round(gp.axes[0]),
+          y:Math.round(gp.axes[1])
+        }
+        let dir;
+        if(axes.x === 1) {
+          if(axes.y === -1) {
+            dir = 60;
+          } else if(axes.y === 1) {
+            dir = 300;
+          } else {
+            dir = 0;
+          }
+        } else if(axes.x === -1) {
+          if(axes.y === -1) {
+            dir = 120;
+          } else if(axes.y === 1) {
+            dir = 240;
+          } else {
+            dir = 180;
+          }          
+        }
+        if(dir !== undefined && dir !== this.olddir) {
+          this.dispatchEvent(new CustomEvent('input-direction', {detail: {value: dir}}));
+          this.olddir = dir;
+        }
+      }
+
+      requestAnimationFrame(this.gamepadApiLoop.bind(this));
+    }
   };
 
   Object.defineProperty(_InputCtrl, "data", {
@@ -9585,7 +9633,7 @@ const InputCtrl = (_ => {
   });
 
   // touch (swipe gesture) handler
-  document.addEventListener('touchstart', evt => {
+  this.addEventListener('touchstart', evt => {
     //console.log("touchstart", evt);
     _InputCtrl.data.touch.delta = {x:0,y:0};
     _InputCtrl.data.touch.origin = {
@@ -9593,10 +9641,9 @@ const InputCtrl = (_ => {
       y:evt.touches[0].clientY
     };
     _InputCtrl.notifyPath('data.touch');
-    evt.preventDefault();
   });
 
-  document.addEventListener('touchmove', evt => {
+  this.addEventListener('touchmove', evt => {
     //console.log("touchmove", evt);
     if(!_InputCtrl.data.touch.origin)
       return;
@@ -9625,16 +9672,23 @@ const InputCtrl = (_ => {
       _InputCtrl.data.touch.delta = delta;
       _InputCtrl.notifyPath('data.touch.delta');
     }
-    evt.preventDefault();
   });
 
-  document.addEventListener('touchend', evt => {
+  this.addEventListener('touchend', evt => {
     //console.log("touchstart", evt);
     _InputCtrl.data.touch.delta = {x:0,y:0};
     _InputCtrl.data.touch.origin = null;
     _InputCtrl.notifyPath('data.touch');
-    evt.preventDefault();
   });
+
+  // gamepad
+  // this.addEventListener("gamepadconnected", evt => {
+  //   console.log('[gamepad connected]', evt);
+  // });
+
+  // this.addEventListener("gamepaddisconnected", evt => {
+  //   console.log('[gamepad disconnected]', evt);
+  // });
 
   return _InputCtrl;
 })();
@@ -9733,6 +9787,8 @@ const InputCtrl = (_ => {
         // 'tape roll pulled' (when the snake extends)
         // 'cut paper' (when eating)
         // 'dump crumbled paper' (when food is dumped/placed)
+
+        requestAnimationFrame(this.gamepadApiLoop.bind(this));
       }
 
       calcsize() {
@@ -9835,13 +9891,18 @@ const InputCtrl = (_ => {
   html,body {
     margin: 0;
     padding:0;
-    
+    overflow-y: hidden;
+    touch-action: none;
   }
   .fullscreen {
+    position:fixed;
+    left:0;
+    top:0;
     display: flex;
     align-items: center;
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
   }
   poly-snake {
     margin-left: auto;

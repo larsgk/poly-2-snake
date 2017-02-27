@@ -231,8 +231,12 @@ const HexaSnake = subclass => class extends subclass {
     }
 
     changeDirection(direction) {
+        const head = this.snake[0];
+        const gridHead = this.grid[head.row][head.col];
         // going in the same direction and directly 180 degree turn not valid
-        if (this.snake[0].direction !== direction && Math.abs(this.snake[0].direction-direction)!=180) {
+        if (head.direction !== direction &&  // not going in the same direction already
+            Math.abs(head.direction-direction) !== 180 && // and not 180 degree turn 
+            gridHead.snake.length < 2) { // and don't allow direction change in the middle of a paper 'fold' 
             this.direction = direction;
             this.fold = !this.fold;
         }
@@ -243,23 +247,27 @@ const HexaSnake = subclass => class extends subclass {
         const newHead = this.getNewHead();
 
         // check for collision
+        const newHeadTile = this.grid[newHead.row][newHead.col];
 
-        const headTile = this.grid[newHead.row][newHead.col];
-
-        if (headTile.wall || 
-            (headTile.snake.length &&
-            headTile.snake[0] != this.snake[1])) { // if the angle is 60 deg, there is a chance you hit yourself (fold paper?)
+        if (newHeadTile.wall) {
+            this.dispatchEvent(new CustomEvent('snake-collision', {detail: {hit: 'wall'}} )); // need to make walls, etc.
+            this.state = "gameover";
+            newHeadTile.collision = true;
+            return;
+        } else if (newHeadTile.snake.length && newHeadTile.snake[0] !== this.snake[0] && newHeadTile.snake[0] !== this.snake[1]) {
+            // if the angle is 60 deg, there is a chance you hit yourself (fold paper?)
+            console.log('hit tile', newHeadTile, this.snake);
             this.dispatchEvent(new CustomEvent('snake-collision', {detail: {hit: 'self'}} )); // need to make walls, etc.
             this.state = "gameover";
-            headTile.collision = true;
+            newHeadTile.collision = true;
             return;
-        } else if (headTile.food) {
+        } else if (newHeadTile.food) {
             // yum yum
             this.eatFood();
         }
 
         // add head of snake to field
-        headTile.snake.unshift(newHead);
+        newHeadTile.snake.unshift(newHead);
 
         this.unshift('snake',newHead);
         if (!this.eaten) {
