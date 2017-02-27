@@ -11,8 +11,20 @@
         position:absolute;
         font-family: Roboto;
         font-weight: bold;
-        font-size: 2em;
-        margin: 0.1em;
+        font-size: 30vw;
+        width: 100%;
+        height: auto;
+        left: 0;
+        top: calc(50% - 15vw);
+        text-align: center;
+        color: rgba(20,20,20,0.2);
+        transition: all 0.4s ease-out;
+      }
+
+      .score.snakeate {
+        transform: scale(1.5);
+        color: rgba(10,10,10,0.3);
+        transition: all 0.2s ease-out;
       }
 
       canvas {
@@ -27,7 +39,7 @@
         bottom:2em;
       }
     </style>
-    <div class="score">[[score]]</div>
+    <div id="score" class="score">[[score]]</div>
     <canvas id="canvas" width="[[width]]" height="[[height]]"></canvas>
   </template>
 
@@ -91,7 +103,11 @@
         this.addEventListener('snake-ate', data => {
           console.log("snake-ate", data.detail);
           this.playEffect('cutpaper');
-          setTimeout(_ => this.playEffect('tape'), 500); // when adding the tail...
+          this.$.score.classList.add("snakeate");
+          setTimeout(_ => {
+            this.playEffect('tape');
+            this.$.score.classList.remove("snakeate");            
+          }, 500); // when adding the tail...
           // play eating sounds
         });
 
