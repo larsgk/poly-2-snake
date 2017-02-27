@@ -1,5 +1,4 @@
 <link rel="import" href="bower_components/polymer/polymer-element.html">
-<link rel="import" href="bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="poly-snake-part.html">
 <link rel="import" href="hexa-snake.html">
 <link rel="import" href="audio-mixin.html">
@@ -8,8 +7,12 @@
 <dom-module id="poly-snake">
   <template>
     <style>
-      h2 {
+      .score {
         position:absolute;
+        font-family: Roboto;
+        font-weight: bold;
+        font-size: 2em;
+        margin: 0.1em;
       }
 
       canvas {
@@ -24,9 +27,8 @@
         bottom:2em;
       }
     </style>
-    <h2>Score: [[score]]</h2>
+    <div class="score">[[score]]</div>
     <canvas id="canvas" width="[[width]]" height="[[height]]"></canvas>
-    <paper-fab icon="favorite" title="heart" class="pause"></paper-fab>
   </template>
 
   <script>
@@ -75,7 +77,11 @@
 
         this.addEventListener('input-direction', data => {
           this.changeDirection(data.detail.value);
-          this.playEffect('fold'); // TODO: base on event
+        });
+
+        this.addEventListener('direction-changed', data => {
+          console.log('direction changed', data.detail)
+            this.playEffect('fold'); // TODO: base on event
         });
 
         this.addEventListener('input-toggle-pause', data => {
@@ -151,8 +157,8 @@
         const sin60 = Math.sin(Math.PI/3);
         const dx = this.width / (this._num_cols+1);
         const dy = 2 * dx * sin60;
-        const dx2 = 0.99 * dx;
-        const dy2 = 0.995 * dy * 0.5;
+        const dx2 = dx;
+        const dy2 = dy * 0.5;
         let cy = dy/2;
         //console.log(`(cols,rows)=(${this._num_cols},${this._num_rows})`);
         for(let row=0;row<this._num_rows;row++) {

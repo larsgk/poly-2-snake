@@ -234,11 +234,13 @@ const HexaSnake = subclass => class extends subclass {
         const head = this.snake[0];
         const gridHead = this.grid[head.row][head.col];
         // going in the same direction and directly 180 degree turn not valid
-        if (head.direction !== direction &&  // not going in the same direction already
+        if (this.direction !== direction && 
+            head.direction !== direction &&  // not going in the same direction already
             Math.abs(head.direction-direction) !== 180 && // and not 180 degree turn 
             gridHead.snake.length < 2) { // and don't allow direction change in the middle of a paper 'fold' 
             this.direction = direction;
             this.fold = !this.fold;
+            this.dispatchEvent(new CustomEvent('direction-changed', {detail: {direction: this.direction}}));
         }
     }
 
