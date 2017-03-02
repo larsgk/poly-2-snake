@@ -4762,10 +4762,10 @@ const InputCtrl = (_ => {
         });
 
         // load sounds
-        this.loadEffect('/sounds/turn1.ogg', 'turn')
-        this.loadEffect('/sounds/eat1.ogg', 'eat')
-        this.loadEffect('/sounds/newgame1.ogg', 'newgame')
-        this.loadEffect('/sounds/die1.ogg', 'splat')
+        this.loadEffect('../sounds/turn1.ogg', 'turn')
+        this.loadEffect('../sounds/eat1.ogg', 'eat')
+        this.loadEffect('../sounds/newgame1.ogg', 'newgame')
+        this.loadEffect('../sounds/die1.ogg', 'splat')
         
         requestAnimationFrame(this.gamepadApiLoop.bind(this));
 
