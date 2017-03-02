@@ -1,0 +1,16 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/poly-snake.html",
+  "fragments": [
+  ],
+  "sources": [
+   "src/**/*",
+   "images/**/*",
+   "sounds/**/*",
+   "bower.json"
+  ],
+  "extraDependencies": [
+    "manifest.json",
+    "bower_components/webcomponentsjs/webcomponents-lite.js"
+  ]
+}
