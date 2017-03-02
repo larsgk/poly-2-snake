@@ -1,4 +1,4 @@
-<html><head><script>
+<script>
 const InputCtrl = (_ => {
   const _InputCtrl = subclass => class extends subclass {
     static get config() {
@@ -14,7 +14,7 @@ const InputCtrl = (_ => {
     }
 
     dataChanged(data) {
-      console.log("InputCtrl data: ", this.data);
+      // console.log("InputCtrl data: ", this.data);
       _InputCtrl.notifyPath('data');
     }
 
@@ -34,7 +34,7 @@ const InputCtrl = (_ => {
     gamepadApiLoop() {
       var gps = navigator.getGamepads();
       if (!gps) {
-        console.log('no gamepads')
+        // console.log('no gamepads')
         return;
       }
       
@@ -115,7 +115,7 @@ const InputCtrl = (_ => {
 
   document.addEventListener('keydown', evt => {
     if(!evt.repeat) {
-      console.log('down', evt);
+      // console.log('down', evt);
       const dir = _KEY_DIR[evt.code];
       if(dir !== undefined) {
         _InputCtrl.dispatchEvent(new CustomEvent('input-direction', {detail: {value: dir}}));
@@ -126,12 +126,12 @@ const InputCtrl = (_ => {
     }
   });
   document.addEventListener('keyup', evt => {
-    console.log('up', evt);
+    // console.log('up', evt);
   });
 
   // touch (swipe gesture) handler
   this.addEventListener('touchstart', evt => {
-    //console.log("touchstart", evt);
+    // console.log("touchstart", evt);
     _InputCtrl.data.touch.delta = {x:0,y:0};
     _InputCtrl.data.touch.origin = {
       x:evt.touches[0].clientX,
@@ -141,7 +141,7 @@ const InputCtrl = (_ => {
   });
 
   this.addEventListener('touchmove', evt => {
-    //console.log("touchmove", evt);
+    // console.log("touchmove", evt);
     if(!_InputCtrl.data.touch.origin)
       return;
 
@@ -163,7 +163,7 @@ const InputCtrl = (_ => {
       _InputCtrl.notifyPath('data.touch');
 
       // emit direction
-      console.log("angle",angleQuant);
+      // console.log("angle",angleQuant);
       _InputCtrl.dispatchEvent(new CustomEvent('input-direction', {detail: {value: angleQuant}}));
     } else {
       _InputCtrl.data.touch.delta = delta;
@@ -172,7 +172,7 @@ const InputCtrl = (_ => {
   });
 
   this.addEventListener('touchend', evt => {
-    //console.log("touchstart", evt);
+    // console.log("touchstart", evt);
     _InputCtrl.data.touch.delta = {x:0,y:0};
     _InputCtrl.data.touch.origin = null;
     _InputCtrl.notifyPath('data.touch');
@@ -180,7 +180,7 @@ const InputCtrl = (_ => {
 
   // gamepad
   // this.addEventListener("gamepadconnected", evt => {
-  //   console.log('[gamepad connected]', evt);
+    // console.log('[gamepad connected]', evt);
   // });
 
   // this.addEventListener("gamepaddisconnected", evt => {
@@ -190,4 +190,4 @@ const InputCtrl = (_ => {
   return _InputCtrl;
 })();
 
-</script></head><body></body></html>
+</script>

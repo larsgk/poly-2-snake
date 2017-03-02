@@ -1,10 +1,9 @@
-<html><head><link rel="import" href="bower_components/polymer/polymer-element.html">
-<link rel="import" href="poly-snake-part.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="hexa-snake.html">
 <link rel="import" href="audio-mixin.html">
 <link rel="import" href="input-ctrl.html">
 
-</head><body><dom-module id="poly-snake">
+<dom-module id="poly-snake">
   <template>
     <style>
       .score {
@@ -79,7 +78,6 @@
         this.addEventListener('snake-collision', data => {
           console.log("snake-collision", data);
           this.playEffect('splat');
-          // play crash sounds
           // init some nasty animation...
         });
 
@@ -89,7 +87,7 @@
 
         this.addEventListener('direction-changed', data => {
           console.log('direction changed', data.detail)
-            this.playEffect('turn'); // TODO: base on event
+            this.playEffect('turn');
         });
 
         this.addEventListener('input-toggle-pause', data => {
@@ -108,16 +106,11 @@
         });
 
         // load sounds
-        this.loadEffect('./turn1.ogg', 'turn')
-        this.loadEffect('./eat1.ogg', 'eat')
-        this.loadEffect('./newgame1.ogg', 'newgame')
-        this.loadEffect('./die1.ogg', 'splat')
-        // missing sounds:
-        // 'folding paper' (when the snake turns)
-        // 'tape roll pulled' (when the snake extends)
-        // 'cut paper' (when eating)
-        // 'dump crumbled paper' (when food is dumped/placed)
-
+        this.loadEffect('/sounds/turn1.ogg', 'turn')
+        this.loadEffect('/sounds/eat1.ogg', 'eat')
+        this.loadEffect('/sounds/newgame1.ogg', 'newgame')
+        this.loadEffect('/sounds/die1.ogg', 'splat')
+        
         requestAnimationFrame(this.gamepadApiLoop.bind(this));
 
         // todo: make proper reload
@@ -222,4 +215,3 @@
 
   </script>
 </dom-module>
-</body></html>
