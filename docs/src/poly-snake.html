@@ -9136,6 +9136,7 @@ const InputCtrl = (_ => {
         this.$.playpause.addEventListener('click', data => {
           if(this.state === "gameover") {
             this.initialize();
+            this.playEffect('newgame');
           } else {
             this.togglePause();
           }
