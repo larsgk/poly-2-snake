@@ -61,8 +61,11 @@ const HexaSnake = subclass => class extends subclass {
         this.state="init";
         this.score = 0;
         this.eaten = 5;
+        this.direction = 0;
 
         setTimeout(_ => {this.placeFood(4)}, 1000);
+
+        this.initTiles(); // TODO: better cleanup... a bit rough ;)
 
         // for now just start
         this.play();

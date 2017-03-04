@@ -3,9 +3,15 @@
 <link rel="import" href="audio-mixin.html">
 <link rel="import" href="input-ctrl.html">
 
+<link rel="import" href="../bower_components/iron-icons/av-icons.html">
+
 <dom-module id="poly-snake">
   <template>
     <style>
+      #gamearea {
+        display: block;
+        position: relative;
+      }
       .score {
         position:absolute;
         font-family: Roboto;
@@ -27,15 +33,39 @@
         transition: all 0.2s ease-out;
       }
 
+      #mute {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        color: black;
+        user-select: none;
+      }
+
+      #playpause {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        color: black;
+        user-select: none;
+      }
+
       canvas {
         padding: 0;
         margin: 0;
         display: block;
-        user-select: none;
+      }
+
+      iron-icon {
+        --iron-icon-width: 13vmin;
+        --iron-icon-height: auto;
       }
     </style>
-    <div id="score" class="score">[[score]]</div>
-    <canvas id="canvas" width="[[width]]" height="[[height]]"></canvas>
+    <div id="gamearea">
+      <canvas id="canvas" width="[[width]]" height="[[height]]"></canvas>
+      <div id="score" class="score">[[score]]</div>
+      <iron-icon id="playpause" icon="av:pause"></iron-icon>
+      <iron-icon id="mute" icon="av:volume-up"></iron-icon>
+    </div>
   </template>
 
   <script>
@@ -52,6 +82,10 @@
             height: {
               type: Number,
               value: 850
+            },
+            mute: {
+              type: Boolean,
+              value: false
             }
           } 
         };
@@ -94,6 +128,20 @@
           this.togglePause();
         });
 
+        this.$.playpause.addEventListener('click', data => {
+          if(this.state === "gameover") {
+            this.initialize();
+          } else {
+            this.togglePause();
+          }
+        });
+
+        this.$.mute.addEventListener('click', data => {
+          this.mute = !this.mute;
+          this.setMute(this.mute);
+          this.$.mute.icon = this.mute ? "av:volume-off" : "av:volume-up";
+        });
+
         this.addEventListener('snake-ate', data => {
           console.log("snake-ate", data.detail);
           this.playEffect('eat');
@@ -106,10 +154,10 @@
         });
 
         // load sounds
-        this.loadEffect('/sounds/turn1.ogg', 'turn')
-        this.loadEffect('/sounds/eat1.ogg', 'eat')
-        this.loadEffect('/sounds/newgame1.ogg', 'newgame')
-        this.loadEffect('/sounds/die1.ogg', 'splat')
+        this.loadEffect('../sounds/turn1.ogg', 'turn')
+        this.loadEffect('../sounds/eat1.ogg', 'eat')
+        this.loadEffect('../sounds/newgame1.ogg', 'newgame')
+        this.loadEffect('../sounds/die1.ogg', 'splat')
         
         requestAnimationFrame(this.gamepadApiLoop.bind(this));
 
@@ -153,9 +201,13 @@
           if(!this.gameTimer) {
             this.gameLoop();
           }
+          this.$.playpause.icon = "av:pause";
         } else if(state === "gameover") {
           clearInterval(this.gameTimer);
+          this.$.playpause.icon = "av:replay";
           this.gameTimer=null;
+        } else if(state === "paused") {
+          this.$.playpause.icon = "av:play-arrow";
         }
       }
 

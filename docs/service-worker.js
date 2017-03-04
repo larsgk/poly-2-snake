@@ -29,7 +29,7 @@
 
 
 /* eslint-disable quotes, comma-spacing */
-var PrecacheConfig = [["/index.html","e13263dbc4c7bea223c0d383ce6f9eb2"]];
+var PrecacheConfig = [["/index.html","ffce9c837ab8ba2d645ec804b9fe920e"],["/src/poly-snake.html","0c8248ff43ae02a9d75dbc441a657d5e"]];
 /* eslint-enable quotes, comma-spacing */
 var CacheNamePrefix = 'sw-precache-v1--' + (self.registration ? self.registration.scope : '') + '-';
 
