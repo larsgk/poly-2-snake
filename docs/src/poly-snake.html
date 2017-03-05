@@ -9054,6 +9054,29 @@ const InputCtrl = (_ => {
         user-select: none;
       }
 
+      #highscore {
+        position: absolute;
+        right: 0.2em;
+        top: 0;
+        font-family: Roboto;
+        font-weight: bold;
+        font-size: 3vmin;
+        text-align: right;
+        color: black;
+        user-select: none;
+      }
+
+      #instructions {
+        position: absolute;
+        left: 0.2em;
+        top: 0;
+        font-family: Roboto;
+        font-weight: bold;
+        font-size: 3vmin;
+        color: black;
+        user-select: none;
+      }
+
       canvas {
         padding: 0;
         margin: 0;
@@ -9070,6 +9093,8 @@ const InputCtrl = (_ => {
       <div id="score" class="score">[[score]]</div>
       <iron-icon id="playpause" icon="av:pause"></iron-icon>
       <iron-icon id="mute" icon="av:volume-up"></iron-icon>
+      <span id="highscore">HIGHSCORE<br>[[highscore]]</span>
+      <span id="instructions">TOUCH SWIPE<br>D,E,W,A,Z,X,P<br>GAMEPAD</span>
     </div>
   </template>
 
@@ -9091,6 +9116,9 @@ const InputCtrl = (_ => {
             mute: {
               type: Boolean,
               value: false
+            },
+            highscore: {
+              type: Number
             }
           } 
         };
@@ -9109,6 +9137,14 @@ const InputCtrl = (_ => {
       _installListeners() {
         console.log("grid", this.grid);
 
+        // get persisted data
+        this.highscore = localStorage.getItem('highscore');
+        if(!this.highscore) this.highscore = 0;
+
+        this.mute = localStorage.getItem('muted') === 'true';
+        this.setMute(this.mute);
+        this.$.mute.icon = this.mute ? "av:volume-off" : "av:volume-up";
+
         window.addEventListener('resize', this.calcsize.bind(this));
         this.calcsize();
 
@@ -9117,6 +9153,10 @@ const InputCtrl = (_ => {
         this.addEventListener('snake-collision', data => {
           console.log("snake-collision", data);
           this.playEffect('splat');
+          if(this.score > this.highscore) {
+            this.highscore = this.score;
+            localStorage.setItem('highscore', this.highscore);
+          }
           // init some nasty animation...
         });
 
@@ -9146,6 +9186,7 @@ const InputCtrl = (_ => {
           this.mute = !this.mute;
           this.setMute(this.mute);
           this.$.mute.icon = this.mute ? "av:volume-off" : "av:volume-up";
+          localStorage.setItem('muted', this.mute);
         });
 
         this.addEventListener('snake-ate', data => {
