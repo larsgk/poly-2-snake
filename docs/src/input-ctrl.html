@@ -1,17 +1,14 @@
 <html><head><script>
 const InputCtrl = (_ => {
   const _InputCtrl = subclass => class extends subclass {
-    static get config() {
-      console.log("INIT INPUT...");
+    static get properties() {
       return {
-        properties: {
           data: {
             type: Object,
             value: _InputCtrl["data"],
+            observer: 'dataChanged'
           }
-        },
-        observers: [ 'dataChanged(data)' ]
-      }
+       }
     }
 
     dataChanged(data) {
