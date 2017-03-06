@@ -2,6 +2,7 @@
 const InputCtrl = (_ => {
   const _InputCtrl = subclass => class extends subclass {
     static get config() {
+      console.log("INIT INPUT...");
       return {
         properties: {
           data: {

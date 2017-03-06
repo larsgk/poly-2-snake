@@ -1,42 +1,40 @@
 <html><head><script>
 const HexaSnake = subclass => class extends subclass {
-    static get config() {
+    static get properties() {
         return {
-            properties: {
-                grid: {
-                    type: Array,
-                    value: null,
-                },
-                snake: {
-                    type: Array,
-                    value: null,
-                },
-                direction: {
-                    type: Number,
-                    value: 0
-                },
-                state: {
-                    type: String,
-                    value: "init"
-                },
-                food: {
-                    type: Object,
-                    value: null
-                },
-                eaten: {
-                    type: Number,
-                    value: 5
-                },
-                score: {
-                    type: Number,
-                    value: 0
-                },
-                fold: {
-                    type: Boolean,
-                    value: false
-                }
+            grid: {
+                type: Array,
+                value: null,
             },
-            observers: [ 'stateChanged(state)' ]
+            snake: {
+                type: Array,
+                value: null,
+            },
+            direction: {
+                type: Number,
+                value: 0
+            },
+            state: {
+                type: String,
+                value: "init",
+                observer: 'stateChanged'
+            },
+            food: {
+                type: Object,
+                value: null
+            },
+            eaten: {
+                type: Number,
+                value: 5
+            },
+            score: {
+                type: Number,
+                value: 0
+            },
+            fold: {
+                type: Boolean,
+                value: false
+            }
         }
     }
 
