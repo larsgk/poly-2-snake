@@ -1,22 +1,13 @@
 <html><head><script>
 const InputCtrl = (_ => {
   const _InputCtrl = subclass => class extends subclass {
-    static get config() {
-      console.log("INIT INPUT...");
+    static get properties() {
       return {
-        properties: {
           data: {
             type: Object,
-            value: _InputCtrl["data"],
+            value: _InputCtrl["data"]
           }
-        },
-        observers: [ 'dataChanged(data)' ]
       }
-    }
-
-    dataChanged(data) {
-      // console.log("InputCtrl data: ", this.data);
-      _InputCtrl.notifyPath('data');
     }
 
     connectedCallback() {
@@ -93,10 +84,6 @@ const InputCtrl = (_ => {
     configurable: false
   });
 
-  _InputCtrl.notifyPath = function(path) {
-    _InputCtrl["instances"].forEach(instance => instance.notifyPath(path))
-  }
-
   _InputCtrl.dispatchEvent = function(evt,data) {
     // TODO: investigate if it's ok to reuse - or a new event should be made for each
     _InputCtrl["instances"].forEach(instance => instance.dispatchEvent(evt,data));
@@ -138,7 +125,6 @@ const InputCtrl = (_ => {
       x:evt.touches[0].clientX,
       y:evt.touches[0].clientY
     };
-    _InputCtrl.notifyPath('data.touch');
   });
 
   this.addEventListener('touchmove', evt => {
@@ -161,14 +147,12 @@ const InputCtrl = (_ => {
       _InputCtrl.data.touch.delta = {x:0,y:0};
       _InputCtrl.data.touch.origin.x += delta.x;
       _InputCtrl.data.touch.origin.y += delta.y;
-      _InputCtrl.notifyPath('data.touch');
 
       // emit direction
       // console.log("angle",angleQuant);
       _InputCtrl.dispatchEvent(new CustomEvent('input-direction', {detail: {value: angleQuant}}));
     } else {
       _InputCtrl.data.touch.delta = delta;
-      _InputCtrl.notifyPath('data.touch.delta');
     }
   });
 
@@ -176,7 +160,6 @@ const InputCtrl = (_ => {
     // console.log("touchstart", evt);
     _InputCtrl.data.touch.delta = {x:0,y:0};
     _InputCtrl.data.touch.origin = null;
-    _InputCtrl.notifyPath('data.touch');
   });
 
   // gamepad
