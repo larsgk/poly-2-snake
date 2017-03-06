@@ -5,9 +5,10 @@ const InputCtrl = (_ => {
       return {
           data: {
             type: Object,
-            value: _InputCtrl["data"]
+            value: _InputCtrl["data"],
+            observer: 'dataChanged'
           }
-      }
+       }
     }
 
     connectedCallback() {
